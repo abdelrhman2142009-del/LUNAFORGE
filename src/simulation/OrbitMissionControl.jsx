@@ -110,6 +110,48 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
 
   const orbitProgress = (orbit.phaseDeg / 360) * 100;
   const downlinkPercent = storedDataMb > 0 ? (downlinkedDataMb / storedDataMb) * 100 : 0;
+  const observedAreas = new Set(
+    captured.map((id) => id === "rosetta" || id === "damietta" ? "coastline" : id === "manzala" ? "wetlands" : "agriculture")
+  );
+  const contractRows = [
+    {
+      id: "core-survey",
+      title: "Complete the regional survey",
+      detail: `${observedAreas.size} / 3 distinct science areas recorded`,
+      complete: observedAreas.size >= 3,
+      reward: 300,
+      kind: "PRIMARY",
+    },
+    {
+      id: "full-coverage",
+      title: "Map all four target sites",
+      detail: `${captured.length} / 4 locations captured`,
+      complete: captured.length === TARGETS.length,
+      reward: 150,
+      kind: "BONUS",
+    },
+    {
+      id: "data-delivery",
+      title: "Deliver at least 80% of collected data",
+      detail: `${downlinkPercent.toFixed(0)}% transmitted to Cairo`,
+      complete: downlinkPercent >= 80,
+      reward: 200,
+      kind: "BONUS",
+    },
+    {
+      id: "power-reserve",
+      title: "Finish with a 25% battery reserve",
+      detail: missionComplete ? `${batteryPercent.toFixed(1)}% remaining` : "Evaluated when the seven-day mission ends",
+      complete: missionComplete && batteryPercent >= 25,
+      reward: 100,
+      kind: "BONUS",
+    },
+  ];
+  const earnedContractPoints = contractRows.reduce(
+    (total, contract) => total + (contract.complete ? contract.reward : 0),
+    0
+  );
+  const possibleContractPoints = contractRows.reduce((total, contract) => total + contract.reward, 0);
 
   return (
     <section className="lf-orbit-game">
@@ -175,6 +217,27 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
               {SPEEDS.map((value) => <option key={value} value={value}>{value}×</option>)}
             </select>
           </label>
+          <section className="lf-orbit-contracts" aria-label="Mission contracts">
+            <div className="lf-orbit-contract-heading">
+              <div>
+                <strong>MISSION CONTRACTS</strong>
+                <small>Complete objectives to earn mission points</small>
+              </div>
+              <span>{earnedContractPoints} / {possibleContractPoints} PTS</span>
+            </div>
+            <div className="lf-orbit-contract-list">
+              {contractRows.map((contract) => (
+                <div className={`lf-orbit-contract ${contract.complete ? "is-complete" : ""}`} key={contract.id}>
+                  <span className="lf-contract-check">{contract.complete ? "✓" : "○"}</span>
+                  <div>
+                    <small>{contract.kind} CONTRACT · {contract.reward} PTS</small>
+                    <strong>{contract.title}</strong>
+                    <p>{contract.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
           <div className="lf-orbit-objectives">
             <strong>MISSION OBJECTIVES</strong>
             {TARGETS.map((item) => <span key={item.id} className={captured.includes(item.id) ? "is-captured" : ""}>{captured.includes(item.id) ? "✓" : "○"} {item.name}</span>)}
