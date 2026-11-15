@@ -34,7 +34,7 @@ function EngineeringAdvisor({
   const massPercentage = (totals.mass / maxMass) * 100;
   const budgetPercentage = (totals.cost / maxBudget) * 100;
 
-  const downlinkMBPerMinute = downlinkSpeed * 7.5;
+  const downlinkMBPerDay = downlinkSpeed * 75;
 
   const advice = [];
 
@@ -190,15 +190,15 @@ function EngineeringAdvisor({
         "Your spacecraft needs a communication system to transmit collected data.",
       recommendation: "Add a communication system.",
     });
-  } else if (dataGenerationRate > downlinkMBPerMinute) {
+  } else if (dataGenerationRate > downlinkMBPerDay) {
     advice.push({
       type: "warning",
       title: "Data generation exceeds downlink",
       message: `Your camera generates ${dataGenerationRate.toFixed(
         1
-      )} MB/min, while the listed downlink capacity is ${downlinkMBPerMinute.toFixed(
+      )} MB/day, while the assumed daily ground-contact capacity is ${downlinkMBPerDay.toFixed(
         1
-      )} MB/min.`,
+      )} MB/day.`,
       recommendation:
         "Consider a faster communication system or a lower data generation rate.",
     });
@@ -207,7 +207,7 @@ function EngineeringAdvisor({
       type: "success",
       title: "Data system looks balanced",
       message:
-        "Your selected storage and communication systems are available, and the listed downlink rate can keep up with the current data generation rate.",
+        "Your selected storage and communication systems are available, and the assumed daily downlink capacity can keep up with the current daily data generation.",
       recommendation:
         "Continue checking storage usage during mission simulation.",
     });

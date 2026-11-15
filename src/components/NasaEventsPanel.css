@@ -1,0 +1,75 @@
+.lf-nasa-events {
+  margin: 28px 0 10px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid rgba(99, 208, 245, .2);
+  border-radius: 18px;
+  background: rgba(10, 27, 44, .88);
+}
+.lf-nasa-events-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.lf-nasa-events h2 { margin: 7px 0; font-size: clamp(21px, 3vw, 28px); }
+.lf-nasa-events-heading p, .lf-nasa-events-credit {
+  margin: 0;
+  color: #a9bdd0;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.lf-nasa-events-heading button {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid rgba(99,208,245,.35);
+  border-radius: 7px;
+  background: #102941;
+  color: #dff6ff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.lf-nasa-events-heading button:disabled { opacity: .55; cursor: wait; }
+.lf-nasa-events-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+.lf-nasa-event {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid rgba(157,190,218,.13);
+  border-radius: 11px;
+  background: rgba(5,17,30,.6);
+}
+.lf-nasa-event-category {
+  color: #63d0f5;
+  font: 700 9px "IBM Plex Mono", monospace;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.lf-nasa-event h3 { margin: 8px 0; font-size: 14px; line-height: 1.4; }
+.lf-nasa-event p { margin: 0; color: #a9bdd0; font-size: 11px; line-height: 1.6; }
+.lf-nasa-event-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  color: #8098ad;
+  font-size: 10px;
+}
+.lf-nasa-event-meta a { color: #63d0f5; font-weight: 700; }
+.lf-nasa-events-state {
+  padding: 20px;
+  border: 1px dashed rgba(157,190,218,.2);
+  border-radius: 10px;
+  color: #a9bdd0;
+  font-size: 12px;
+}
+.lf-nasa-events-credit { margin-top: 15px; font-size: 10px; }
+@media (max-width: 620px) {
+  .lf-nasa-events-heading { flex-direction: column; }
+  .lf-nasa-events-grid { grid-template-columns: 1fr; }
+}

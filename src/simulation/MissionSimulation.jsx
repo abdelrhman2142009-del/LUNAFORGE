@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { startSimulation } from "./simulationEngine.js";
 import { SIMULATION_STAGES, INITIAL_SIMULATION_STATE } from "./simulationStages.js";
-import { applySpaceEvent, pickRandomSpaceEvent } from "./SpaceEvents.js";
+import { applySpaceEvent } from "./SpaceEvents.js";
+import { evaluateNileDeltaMission } from "./missionObjectives.js";
 import WhatIfPanel from "./WhatIfPanel.jsx";
 import MissionLog from "./MissionLog.jsx";
 import "./simulation.css";
+import EarthGlobe from "../components/EarthGlobe";
+import NasaImageryPanel from "../components/NasaImageryPanel";
+import OrbitMissionControl from "./OrbitMissionControl.jsx";
 import "./simulation-enhancements.css";
 
 function makeLogEntry(title, message) {
@@ -38,6 +42,8 @@ export default function MissionSimulation({
   resourceStatus: initialResourceStatus = {},
   missionValid,
   missionInputs = {},
+  engineeringMission,
+  missionConfig,
   onScenarioCompare = () => {},
   onSimulationComplete = () => {},
   onBack = () => {},
@@ -45,6 +51,13 @@ export default function MissionSimulation({
   const [simulation, setSimulation] = useState(INITIAL_SIMULATION_STATE);
   const [resources, setResources] = useState(initialResourceStatus);
   const [events, setEvents] = useState([]);
+  const [missionOutcome, setMissionOutcome] = useState(null);
+  const [observedAreas, setObservedAreas] = useState([]);
+  const observedAreasRef = useRef([]);
+  const [missedContacts, setMissedContacts] = useState(0);
+  const [difficulty, setDifficulty] = useState("standard");
+  const [orbitSessionKey, setOrbitSessionKey] = useState(0);
+  const missedContactsRef = useRef(0);
   const [logEntries, setLogEntries] = useState([
     makeLogEntry("Mission control ready", "The educational CubeSat scenario is ready to start."),
   ]);
@@ -79,6 +92,11 @@ export default function MissionSimulation({
 
   function handleEvent(event) {
     setEvents((previous) => [event, ...previous].slice(0, 5));
+    if (event.id === "temporary_comms_gap") {
+      missedContactsRef.current += 1;
+      setMissedContacts(missedContactsRef.current);
+      addLog("Ground-station contact missed", "One assumed daily contact was lost in this scenario.");
+    }
     const nextResources = applySpaceEvent(resourcesRef.current, event);
     resourcesRef.current = nextResources;
     setResources(nextResources);
@@ -93,12 +111,31 @@ export default function MissionSimulation({
 
     controllerRef.current = startSimulation({
       onUpdate: setSimulation,
-      onStageChange: (stage) => addLog(`Phase: ${stage.title}`, stage.description),
+      onStageChange: (stage) => {
+        addLog(`Phase: ${stage.title}`, stage.description);
+        if (stage.id === "observation") {
+          addLog(
+            "Observation phase",
+            "Use the orbital operations panel to wait for a target pass and capture each area manually."
+          );
+        }
+      },
+      eventProbability: difficulty === "training" ? 0.03 : difficulty === "expert" ? 0.28 : 0.12,
       onEvent: handleEvent,
       onComplete: (finalState) => {
+        const outcome = evaluateNileDeltaMission({
+          engineeringMission,
+          observedAreas: observedAreasRef.current,
+          durationDays: missionConfig?.scenario?.durationDays ?? 7,
+          missedContacts: missedContactsRef.current,
+        });
         setSimulation(finalState);
-        addLog("Simulation completed", "The five-phase educational mission timeline has finished.");
-        onSimulationComplete(finalState);
+        setMissionOutcome(outcome);
+        addLog(
+          "Mission evaluation completed",
+          `${outcome.status}: ${outcome.completedObjectives}/${outcome.totalObjectives} objectives completed; ${outcome.dataDownlinkedPercent.toFixed(1)}% of stored data downlinked.`
+        );
+        onSimulationComplete({ ...finalState, missionOutcome: outcome });
       },
     });
     addLog("Simulation started", "The mission timeline has begun.");
@@ -119,11 +156,24 @@ export default function MissionSimulation({
     controllerRef.current?.stop();
     controllerRef.current = null;
     setSimulation(INITIAL_SIMULATION_STATE);
+    setOrbitSessionKey((key) => key + 1);
     setEvents([]);
+    setMissionOutcome(null);
+    setObservedAreas([]);
+    observedAreasRef.current = [];
+    setMissedContacts(0);
+    missedContactsRef.current = 0;
     setResources(initialResourceStatus);
     resourcesRef.current = initialResourceStatus;
     addLog("Simulation restarted", "The scenario was reset to its initial state.");
     handleStart();
+  }
+
+  function handleOrbitTargetsCaptured(targetIds) {
+    const areaMap = { rosetta: "coastline", damietta: "coastline", manzala: "wetlands", delta: "agriculture" };
+    const areas = [...new Set(targetIds.map((id) => areaMap[id]).filter(Boolean))];
+    observedAreasRef.current = areas;
+    setObservedAreas(areas);
   }
 
   function handleWhatIf(scenario) {
@@ -136,8 +186,8 @@ export default function MissionSimulation({
       <header className="lf-sim-header">
         <div>
           <p className="lf-eyebrow">LUNAFORGE / MISSION CONTROL</p>
-          <h1>Earth Observation CubeSat</h1>
-          <p className="lf-muted">Low Earth Orbit · Educational mission simulation</p>
+          <h1>{missionConfig?.mission?.name ?? "Nile Delta Watch"}</h1>
+          <p className="lf-muted">Nile Delta, Egypt · 500 km LEO · 7 scenario days (accelerated game timeline)</p>
         </div>
         <div className="lf-sim-header-actions">
           <button type="button" className="lf-button lf-button-secondary" onClick={onBack}>Back to analysis</button>
@@ -148,24 +198,14 @@ export default function MissionSimulation({
       <section className="lf-sim-grid">
         <div className="lf-scene-card">
           <div className="lf-scene-topline">
-            <span>ORBIT VIEW</span><span>2D SCHEMATIC · NOT TO SCALE</span>
+            <span>ORBIT VIEW</span><span>NASA BLUE MARBLE · TEXTURED 3D GLOBE</span>
           </div>
           <div className={`lf-space-scene ${isRunning ? "is-running" : ""} ${isPaused ? "is-paused" : ""}`}>
             <span className="lf-star lf-star-one" /><span className="lf-star lf-star-two" />
             <span className="lf-star lf-star-three" /><span className="lf-star lf-star-four" />
             <div className="lf-orbit-ring" />
-            <div className="lf-earth">
-              <span className="lf-earth-land lf-land-one" /><span className="lf-earth-land lf-land-two" />
-              <span className="lf-earth-glow" />
-            </div>
-            <div className="lf-satellite-orbit">
-              <div className="lf-satellite">
-                <span className="lf-sat-panel lf-sat-panel-left" /><span className="lf-sat-body" />
-                <span className="lf-sat-panel lf-sat-panel-right" /><span className="lf-sat-antenna" />
-              </div>
-            </div>
+            <EarthGlobe />
             <div className="lf-scene-label lf-earth-label">EARTH</div>
-            <div className="lf-scene-label lf-satellite-label">CUBESAT</div>
           </div>
           <div className="lf-progress-row">
             <div><span className="lf-muted">MISSION PROGRESS</span><strong>{Math.round(simulation.totalProgress)}%</strong></div>
@@ -183,16 +223,37 @@ export default function MissionSimulation({
           </div>
 
           <div className="lf-panel-card">
+            <p className="lf-eyebrow">OBSERVATION TARGETS</p>
+            <div className="lf-metrics">
+              {NILE_DELTA_AREAS.map((area) => (
+                <Metric
+                  key={area.id}
+                  label={area.name}
+                  value={observedAreas.includes(area.id) ? "Recorded" : "Pending"}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="lf-panel-card">
             <p className="lf-eyebrow">TELEMETRY</p>
             <div className="lf-metrics">
               <Metric label="Power" value={resources.powerPercent} unit="%" />
               <Metric label="Storage used" value={resources.storagePercent} unit="%" />
               <Metric label="Communication" value={resources.communication} />
             </div>
-            <p className="lf-footnote">Telemetry is populated by Member 3 integration when connected.</p>
+            <p className="lf-footnote">Telemetry is a simplified gameplay model, not live spacecraft data.</p>
           </div>
 
           <div className="lf-controls">
+            <label className="lf-difficulty-control">
+              Scenario intensity
+              <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} disabled={isRunning || isPaused}>
+                <option value="training">Training · fewer random events</option>
+                <option value="standard">Standard · balanced</option>
+                <option value="expert">Expert · more random events</option>
+              </select>
+            </label>
             {!isRunning && !isPaused && !isCompleted && <button className="lf-button lf-button-primary" onClick={handleStart}>Start simulation</button>}
             {isRunning && <button className="lf-button lf-button-primary" onClick={handlePause}>Pause</button>}
             {isPaused && <button className="lf-button lf-button-primary" onClick={handleResume}>Resume</button>}
@@ -206,6 +267,10 @@ export default function MissionSimulation({
           </div>
         </aside>
       </section>
+
+      <OrbitMissionControl key={orbitSessionKey} engineeringMission={engineeringMission} onTargetsCaptured={handleOrbitTargetsCaptured} />
+
+      <NasaImageryPanel />
 
       <section className="lf-timeline-card">
         <div className="lf-timeline-heading">
@@ -225,6 +290,36 @@ export default function MissionSimulation({
           })}
         </div>
       </section>
+
+      {missionOutcome && (
+        <section className="lf-timeline-card" aria-live="polite">
+          <div className="lf-timeline-heading">
+            <div>
+              <p className="lf-eyebrow">NILE DELTA WATCH / FINAL REPORT</p>
+              <h2>{missionOutcome.status}</h2>
+            </div>
+            <strong>{missionOutcome.completedObjectives}/{missionOutcome.totalObjectives} objectives</strong>
+          </div>
+          <div className="lf-metrics">
+            <Metric label="Areas observed" value={missionOutcome.areasObserved} unit={` / ${missionOutcome.areasTarget}`} />
+            <Metric label="Data generated" value={missionOutcome.generatedDataMB.toFixed(1)} unit=" MB" />
+            <Metric label="Data stored" value={missionOutcome.storedDataMB.toFixed(1)} unit=" MB" />
+            <Metric label="Data transmitted" value={missionOutcome.transmittedDataMB.toFixed(1)} unit=" MB" />
+            <Metric label="Downlinked" value={missionOutcome.dataDownlinkedPercent.toFixed(1)} unit="%" />
+            <Metric label="Missed contacts" value={missionOutcome.missedContacts} />
+          </div>
+          <ul className="lfx-event-list">
+            {missionOutcome.objectives.map((objective) => (
+              <li key={objective.id}>
+                <strong>{objective.completed ? "✓" : "○"} {objective.title}</strong>
+                <p>{objective.detail}</p>
+              </li>
+            ))}
+          </ul>
+          {missionOutcome.reasons.map((reason) => <p className="lfx-muted" key={reason}>{reason}</p>)}
+          <p className="lfx-disclaimer">{missionOutcome.educationalDisclaimer}</p>
+        </section>
+      )}
 
       <section className="lfx-feature-grid">
         <div className="lfx-card">

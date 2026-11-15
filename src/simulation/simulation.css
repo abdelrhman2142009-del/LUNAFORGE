@@ -112,3 +112,25 @@
 
 .lf-sim-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 @media (max-width: 520px) { .lf-sim-header { align-items: flex-start; flex-direction: column; } .lf-sim-header-actions { width: 100%; justify-content: space-between; } }
+
+
+.lf-difficulty-control {
+  display: grid;
+  gap: 6px;
+  color: var(--lf-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.lf-difficulty-control select {
+  min-height: 38px;
+  max-width: 100%;
+  padding: 0 10px;
+  border: 1px solid var(--lf-panel-border);
+  border-radius: 8px;
+  background: #102941;
+  color: var(--lf-text);
+  font: inherit;
+  font-size: 11px;
+}
+.lf-difficulty-control select:disabled { opacity: .6; }

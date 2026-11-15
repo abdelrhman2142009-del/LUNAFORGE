@@ -1,0 +1,50 @@
+[
+  {
+    "term": "Nile Delta Watch",
+    "definition": "An educational LUNAFORGE Earth-observation mission scenario focused on simulated observations of the Nile Delta."
+  },
+  {
+    "term": "Coastal erosion",
+    "definition": "The removal of material from a coast, which can cause the shoreline to move landward over time."
+  },
+  {
+    "term": "Coastal accretion",
+    "definition": "The accumulation of sediment along a coast, which can cause the shoreline to move seaward."
+  },
+  {
+    "term": "Shoreline change",
+    "definition": "A change in the position or shape of a shoreline over time. Different parts of the Nile Delta can experience erosion, accretion, or relative stability."
+  },
+  {
+    "term": "Wetland",
+    "definition": "An area where water covers or saturates the soil for at least part of the year, supporting water-adapted plants and wildlife."
+  },
+  {
+    "term": "Land cover",
+    "definition": "The physical material or surface present on the ground, such as water, vegetation, bare soil, or buildings."
+  },
+  {
+    "term": "Land-use change",
+    "definition": "A change in how people use an area of land, such as converting agricultural fields into built-up areas."
+  },
+  {
+    "term": "Landsat",
+    "definition": "A family of Earth-observation satellites that collect images used to study land and environmental change."
+  },
+  {
+    "term": "Sentinel-2",
+    "definition": "A European Copernicus satellite mission that provides multispectral optical imagery of Earth's land and coastal areas."
+  },
+  {
+    "term": "Ground sampling distance (GSD)",
+    "definition": "The approximate ground dimension represented by one image pixel. It is commonly expressed in metres per pixel and depends on the imaging system and observation geometry."
+  },
+  {
+    "term": "Synthetic gameplay data",
+    "definition": "Artificially generated values or images used by a simulation. They are not measurements collected by a real satellite."
+  },
+  {
+    "term": "Data downlink",
+    "definition": "The transmission of stored spacecraft data to a ground station."
+  }
+]

@@ -4,6 +4,10 @@ import "./App.css";
 import Builder from "./components/Builder";
 import MissionSimulation from "./simulation/MissionSimulation";
 import { runEngineeringWhatIf } from "./engine/engineAdapter";
+import nileDeltaWatch from "./data/nile_delta_watch.json";
+import EarthGlobe from "./components/EarthGlobe";
+import NasaImageryPanel from "./components/NasaImageryPanel";
+import NasaEventsPanel from "./components/NasaEventsPanel";
 const features = [
   {
     number: "01",
@@ -58,7 +62,7 @@ function App() {
   };
   const cameraUpgrade = missionReport?.selectedComponents?.some((item) => item.id === "camera-1")
     ? missionReport.selectedComponents.map((item) => item.id === "camera-1"
-        ? { ...item, id: "camera-2", name: "Advanced Earth Camera", mass: 0.8, cost: 220, power: 5, dataGenerationMBPerMinute: 20 }
+        ? { ...item, id: "camera-2", name: "Advanced Earth Camera", mass: 0.8, cost: 220, power: 5, dataPerImageMB: 60, imagesPerDay: 3 }
         : item)
     : null;
   const whatIfResult = cameraUpgrade && engineAnalysis
@@ -105,6 +109,13 @@ function App() {
             onClick={() => setScreen("missions")}
           >
             Missions
+          </a>
+
+          <a
+            href="#nasa-earth-data"
+            onClick={() => setScreen("home")}
+          >
+            Earth Data
           </a>
         </nav>
 
@@ -176,9 +187,7 @@ function App() {
                 <div className="orbit orbit-one" />
                 <div className="orbit orbit-two" />
 
-                <div className="earth">
-                  <div className="earth-glow" />
-                </div>
+                <EarthGlobe />
 
                 <div className="satellite">
                   <div className="solar-panel left-panel" />
@@ -199,10 +208,15 @@ function App() {
               </div>
 
               <div className="visual-bottom">
-                <span>EARTH OBSERVATION CUBESAT</span>
+                <span>NILE DELTA WATCH / EARTH OBSERVATION</span>
                 <span>MISSION CONCEPT / 001</span>
               </div>
             </div>
+          </section>
+
+          <section className="page-section" aria-label="NASA Earth observation explorer">
+            <NasaImageryPanel />
+            <NasaEventsPanel />
           </section>
 
           <section className="features-section" id="features">
@@ -250,23 +264,20 @@ function App() {
             </div>
 
             <div className="mission-card-content">
-              <span className="mission-symbol">EO / 01</span>
-              <h2>EARTH OBSERVATION CUBESAT</h2>
+              <span className="mission-symbol">NDW / 01</span>
+              <h2>{nileDeltaWatch.mission.name.toUpperCase()}</h2>
 
               <p>
-                Design a small satellite in Low Earth Orbit
-                capable of collecting Earth observation data.
-                Balance engineering constraints and complete
-                your mission objectives.
+                Design a 6U CubeSat to explore simulated coastal change,
+                Lake Manzala wetlands, and agricultural and urban patterns
+                across Egypt's Nile Delta. Collect, store, and downlink
+                observation data while balancing spacecraft resources.
               </p>
 
               <div className="mission-specs">
-                <div><span>ORBIT TYPE</span><strong>LEO</strong></div>
+                <div><span>ORBIT</span><strong>500 km LEO</strong></div>
+                <div><span>DURATION</span><strong>7 MISSION DAYS</strong></div>
                 <div><span>DIFFICULTY</span><strong>BEGINNER</strong></div>
-                <div>
-                  <span>MISSION TYPE</span>
-                  <strong>EARTH OBSERVATION</strong>
-                </div>
               </div>
             </div>
 
@@ -294,13 +305,12 @@ function App() {
           <div className="eyebrow">MISSION 001 / MISSION BRIEFING</div>
 
           <h1 className="page-title">
-            EARTH <span>OBSERVER.</span>
+            NILE DELTA <span>WATCH.</span>
           </h1>
 
           <p className="page-intro">
-            Your objective is to design and operate a CubeSat
-            that collects useful observations of Earth from
-            Low Earth Orbit.
+            {nileDeltaWatch.mission.purpose} This is a seven-day
+            educational scenario using synthetic gameplay data.
           </p>
 
           <div className="briefing-grid">
@@ -309,10 +319,10 @@ function App() {
               <h2>THE MISSION</h2>
 
               <p>
-                Design a small satellite equipped with an
-                observation payload. Your spacecraft must
-                collect image data, store it onboard, and
-                transmit it to a ground station.
+                Design a 6U observation satellite to investigate
+                the Nile Delta's coast, wetlands, and agricultural
+                and urban land patterns. Collect simulated scenes,
+                store them onboard, and transmit them to a ground station.
               </p>
 
               <div className="objective-highlight">
@@ -320,6 +330,14 @@ function App() {
                 <strong>
                   Collect and transmit Earth observation data.
                 </strong>
+              </div>
+              <div className="objective-highlight">
+                <span>PRIORITY OBSERVATION AREAS</span>
+                <ul className="requirements-list">
+                  {nileDeltaWatch.mission.region.focusAreas.map((area) => (
+                    <li key={area}>{area}</li>
+                  ))}
+                </ul>
               </div>
             </article>
 
@@ -330,8 +348,9 @@ function App() {
               <div className="parameter-list">
                 <div><span>Orbit</span><strong>Low Earth Orbit (LEO)</strong></div>
                 <div><span>Target altitude</span><strong>500 km</strong></div>
-                <div><span>Mission duration</span><strong>90 days</strong></div>
-                <div><span>Spacecraft type</span><strong>CubeSat</strong></div>
+                <div><span>Mission duration</span><strong>7 scenario days</strong></div>
+                <div><span>Spacecraft type</span><strong>6U CubeSat</strong></div>
+                <div><span>Observation region</span><strong>Nile Delta, Egypt</strong></div>
               </div>
             </article>
 
@@ -340,7 +359,9 @@ function App() {
               <h2>MISSION CONSTRAINTS</h2>
 
               <div className="parameter-list">
+                <div><span>Spacecraft dimensions</span><strong>100 × 226.3 × 366 mm</strong></div>
                 <div><span>Maximum mass</span><strong>12.0 kg</strong></div>
+                <div><span>Target wet mass</span><strong>8.0 kg (game target)</strong></div>
                 <div><span>Available budget</span><strong>1,000 credits</strong></div>
                 <div><span>Power system</span><strong>Must support operations</strong></div>
                 <div><span>Data storage</span><strong>Must fit collected data</strong></div>
@@ -361,7 +382,9 @@ function App() {
                 <li>Stay within the mission budget.</li>
                 <li>Provide enough power for your components.</li>
                 <li>Include a payload for Earth observation.</li>
-                <li>Store and transmit the collected data.</li>
+                <li>Observe at least three priority areas.</li>
+                <li>Store the collected image data.</li>
+                <li>Downlink at least 80% of stored data.</li>
               </ul>
             </article>
             {engineAnalysis && (
@@ -488,8 +511,8 @@ function App() {
                 </div>
 
                 <div>
-                  <span>Power consumption</span>
-                  <strong>{missionReport.totals.power.toFixed(1)} W</strong>
+                  <span>Estimated average spacecraft load</span>
+                  <strong>{(engineAnalysis?.mission?.metrics?.averageLoadW ?? 0).toFixed(1)} W</strong>
                 </div>
 
                 <div>
@@ -507,20 +530,25 @@ function App() {
 
               <div className="parameter-list">
                 <div>
-                  <span>Solar power generation</span>
-                  <strong>{solarPower.toFixed(1)} W</strong>
+                  <span>Estimated average solar generation</span>
+                  <strong>{(engineAnalysis?.mission?.metrics?.averageGenerationW ?? solarPower).toFixed(1)} W</strong>
                 </div>
 
                 <div>
-                  <span>Power consumption</span>
+                  <span>Estimated average spacecraft load</span>
+                  <strong>{(engineAnalysis?.mission?.metrics?.averageLoadW ?? 0).toFixed(1)} W</strong>
+                </div>
+
+                <div>
+                  <span>Selected subsystem active-power ratings</span>
                   <strong>{missionReport.totals.power.toFixed(1)} W</strong>
                 </div>
 
                 <div>
                   <span>Power balance</span>
                   <strong>
-                    {powerBalance > 0 ? "+" : ""}
-                    {powerBalance.toFixed(1)} W
+                    {((engineAnalysis?.mission?.metrics?.powerMarginW ?? powerBalance) > 0) ? "+" : ""}
+                    {(engineAnalysis?.mission?.metrics?.powerMarginW ?? powerBalance).toFixed(1)} W
                   </strong>
                 </div>
 
@@ -603,6 +631,8 @@ function App() {
       powerMarginPercent: simulationPowerPercent,
       massBudgetPercent: simulationMassBudgetPercent,
     }}
+    engineeringMission={engineAnalysis?.mission}
+    missionConfig={nileDeltaWatch}
     onBack={() => setScreen("analysis")}
   />
 )}

@@ -48,7 +48,8 @@ const components = [
     description: "A basic optical camera for Earth observation.",
     mass: 0.5,
     power: 3,
-    dataGenerationMBPerMinute: 8,
+    dataPerImageMB: 25,
+    imagesPerDay: 3,
     cost: 120,
   },
   {
@@ -59,7 +60,8 @@ const components = [
     description: "A higher-performance camera with increased resource demands.",
     mass: 0.8,
     power: 5,
-    dataGenerationMBPerMinute: 20,
+    dataPerImageMB: 60,
+    imagesPerDay: 3,
     cost: 220,
   },
   {
@@ -144,9 +146,9 @@ function Builder({ onProceed }) {
         storageCapacityGB:
           result.storageCapacityGB +
           (component.storageCapacityGB || 0),
-        dataGenerationMBPerMinute:
-          result.dataGenerationMBPerMinute +
-          (component.dataGenerationMBPerMinute || 0),
+        dataPerDayMB:
+          result.dataPerDayMB +
+          (component.dataPerImageMB || 0) * (component.imagesPerDay || 0),
         downlinkSpeedMbps:
           result.downlinkSpeedMbps +
           (component.downlinkSpeedMbps || 0),
@@ -157,7 +159,7 @@ function Builder({ onProceed }) {
         cost: 0,
         batteryCapacityWh: 0,
         storageCapacityGB: 0,
-        dataGenerationMBPerMinute: 0,
+        dataPerDayMB: 0,
         downlinkSpeedMbps: 0,
       }
     );
@@ -240,13 +242,15 @@ function Builder({ onProceed }) {
 
   // POWER ANALYSIS
 
+  // Use an average-generation gameplay estimate, not panel peak output.
+  // The 72% factor is a simplified allowance for illumination and conversion.
   const solarPower = selectedComponents.reduce(
-    (total, component) =>
-      total + (component.solarPowerOutput || 0),
+    (total, component) => total + (component.solarPowerOutput || 0) * 0.72,
     0
   );
 
-  const powerBalance = solarPower - totals.power;
+  const averagePowerLoad = 12 + totals.power * 0.15;
+  const powerBalance = solarPower - averagePowerLoad;
 
   const powerSufficient =
     hasSolarPanels && powerBalance >= 0;
@@ -254,7 +258,7 @@ function Builder({ onProceed }) {
   // DATA SYSTEM ANALYSIS
 
   const storageAvailable = totals.storageCapacityGB;
-  const dataGenerationRate = totals.dataGenerationMBPerMinute;
+  const dataGenerationRate = totals.dataPerDayMB;
   const downlinkSpeed = totals.downlinkSpeedMbps;
 
   const hasStorage = storageAvailable > 0;
@@ -270,10 +274,8 @@ function Builder({ onProceed }) {
     { label: "Energy storage battery", complete: hasBattery },
     { label: "Observation payload", complete: hasPayload },
     { label: "Onboard computer", complete: hasComputer },
-    { label: "Attitude control (ADCS)", complete: selectedComponents.some((c) => c.slot === "adcs") },
-    { label: "Electrical power management (EPS)", complete: selectedComponents.some((c) => c.slot === "eps") },
-    { label: "Attitude determination and control (ADCS)", complete: selectedComponents.some((component) => component.slot === "adcs") },
-    { label: "Electrical power management (EPS)", complete: selectedComponents.some((component) => component.slot === "eps") },
+    { label: "Attitude control (ADCS)", complete: hasAdcs },
+    { label: "Electrical power management (EPS)", complete: hasEps },
     { label: "Communication system", complete: hasCommunication },
     { label: "Data storage", complete: hasStorage },
     { label: "Data generation", complete: hasDataGeneration },
@@ -452,7 +454,7 @@ function Builder({ onProceed }) {
                     </div>
                   </div>
 
-                  {(component.dataGenerationMBPerMinute ||
+                  {(component.dataPerImageMB ||
                     component.storageCapacityGB ||
                     component.downlinkSpeedMbps ||
                     component.batteryCapacityWh) && (
@@ -467,11 +469,11 @@ function Builder({ onProceed }) {
                         lineHeight: 1.8,
                       }}
                     >
-                      {component.dataGenerationMBPerMinute && (
+                      {component.dataPerImageMB && (
                         <div>
-                          DATA GENERATION:{" "}
+                          IMAGE DATA:{" "}
                           <strong style={{ color: "#65c9f1" }}>
-                            {component.dataGenerationMBPerMinute} MB/min
+                            {component.dataPerImageMB} MB/image · {component.imagesPerDay} images/day
                           </strong>
                         </div>
                       )}
@@ -753,10 +755,10 @@ function Builder({ onProceed }) {
 
           <div className="resource-card">
             <div className="resource-top">
-              <span>Data Generation</span>
+              <span>Daily Data Generation</span>
               <strong>
-                {totals.dataGenerationMBPerMinute.toFixed(1)}
-                <small> MB/min</small>
+                {totals.dataPerDayMB.toFixed(1)}
+                <small> MB/day</small>
               </strong>
             </div>
 

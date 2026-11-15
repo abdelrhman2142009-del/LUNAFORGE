@@ -1,6 +1,6 @@
 # LUNAFORGE — Integration Contract
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Maintainer:** Member 5 — Integration & Testing  
 **Status:** Current-main-branch contract with open team decisions
 
@@ -19,7 +19,7 @@ This document records the interfaces visible in the current repository. If the t
 
 ### Observed structure differences
 
-The original main branch placed the React simulation screen in `src/components/MissionSimulation.jsx`. The Member 5 integration branch copies Member 4's simulation module into `src/simulation/*` and routes `src/App.jsx` to the new screen. The older component screen remains in the repository as a legacy/alternate implementation and should be removed only after team review.
+The active app routes to `src/simulation/MissionSimulation.jsx`. The older `src/components/MissionSimulation.jsx` remains a legacy/alternate implementation and should be removed only after team review.
 - No `src/data/missionData.js` was found.
 - The component catalog is `src/engine/componentsData.js`.
 - The existing compatibility test remains at the repository root as `integration.test.js`.
@@ -68,7 +68,7 @@ Exports:
 - `COMPONENTS_BY_ID`
 - `getComponent(id)`
 
-The engine's canonical component identifiers include values such as `camera_basic`, `solar_body_6u`, `battery_standard`, and `structure_6u`.
+The engine's canonical component identifiers include values such as `camera_basic`, `solar_body_6u`, `battery_standard`, and `structure_6u`. The mission's `src/data/nile_delta_watch.json` references these IDs and a test verifies that each referenced ID exists in the runtime catalog.
 
 ### Mission calculations
 
@@ -105,7 +105,15 @@ File: `src/engine/engineAdapter.js`
 
 **Rule:** React components should display engine results rather than reimplementing the same calculations.
 
-## 5. Required integration behavior
+## 5. Nile Delta Watch runtime behavior
+
+- `src/data/nile_delta_watch.json` is the mission profile and research metadata source.
+- `src/simulation/missionObjectives.js` evaluates the three synthetic areas, generated/stored/transmitted data, and objective completion.
+- The current gameplay model assumes three images per day and one 10-minute ground contact per day. These are explicit game-balancing assumptions, not orbital access or radio-link predictions.
+- The engineering catalog stores solar peak power separately from average-generation estimates. The 72% conversion factor is a gameplay assumption; selected solar generation is not added to subsystem load.
+- `tests/nile-delta-watch.integration.test.js` checks power separation, mission objectives, downlink thresholds, and component-ID consistency.
+
+## 6. Required integration behavior
 
 The team should verify this flow end to end:
 
@@ -118,7 +126,7 @@ The team should verify this flow end to end:
 7. The simulation receives the selected configuration and its required derived values.
 8. The final mission report reflects the simulation outcome.
 
-## 6. Test and build commands
+## 7. Test and build commands
 
 ```bash
 npm install
@@ -128,7 +136,7 @@ npm run build
 
 Vitest tests belong under `tests/` or use the supported Vitest test filename pattern. A passing unit test suite does not by itself prove that the complete browser workflow works; the team must also run the manual demo checklist.
 
-## 7. Pull Request rules
+## 8. Pull Request rules
 
 - Each member works on a feature branch.
 - PRs describe purpose, changed files, and checks run.
@@ -137,15 +145,16 @@ Vitest tests belong under `tests/` or use the supported Vitest test filename pat
 - Do not merge a PR merely because GitHub reports it is mergeable; run tests and build.
 - Avoid parallel edits to `src/App.jsx`, `package.json`, or shared engine interfaces.
 
-## 8. Open decisions before final submission
+## 9. Open decisions before final submission
 
 - Confirm Member 2 / Member 4 ownership of `MissionSimulation.jsx`.
 - Decide whether to introduce a separate `src/simulation/` module.
 - Decide whether mission briefing data should move into a dedicated data module.
 - Confirm that the game economy intentionally uses credits rather than USD.
+- Review the 72% average solar-generation factor, 15% subsystem duty-cycle estimate, and one 10-minute daily contact as game-balancing assumptions.
 - Ensure each research-backed catalog value has a source and each simplified value is labeled as an assumption.
 - Confirm whether the `simulation` branch contains work that should be submitted through a PR.
 
-## 9. Scope and limitations
+## 10. Scope and limitations
 
 LUNAFORGE is an educational game using simplified assumptions. Its calculations and simulation are not suitable for building, operating, or certifying real spacecraft.

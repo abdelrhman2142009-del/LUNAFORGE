@@ -1,0 +1,250 @@
+{
+  "project": "LUNAFORGE",
+  "mission": {
+    "id": "nile_delta_watch",
+    "name": "Nile Delta Watch",
+    "type": "Earth Observation",
+    "difficulty": "Beginner",
+    "spacecraftType": "6U CubeSat",
+    "orbit": {
+      "name": "Low Earth Orbit (LEO)",
+      "altitudeKm": 500,
+      "altitudeStatus": "selected_game_design_assumption",
+      "inclination": null,
+      "note": "The 500 km altitude reuses the project's existing educational baseline. No orbital inclination or exact local-time orbit has been selected."
+    },
+    "region": {
+      "name": "Nile Delta, Egypt",
+      "focusAreas": [
+        "Rosetta coastal area",
+        "Damietta coastal area",
+        "Lake Manzala and nearby wetlands",
+        "Agricultural and urban transition areas"
+      ]
+    },
+    "purpose": "Use simulated Earth-observation images to help players investigate changes in the Nile Delta's coastline, wetlands, agricultural land, and expanding built-up areas.",
+    "educationalSimulation": true,
+    "flightReadyDesign": false
+  },
+  "scenario": {
+    "durationDays": 7,
+    "durationStatus": "game_design_assumption",
+    "description": "A short educational mission in which the player plans observations of selected Nile Delta areas, stores the generated image data, and downlinks it during simulated ground-station opportunities.",
+    "dataSource": "Synthetic gameplay events and values; this mission does not ingest live satellite imagery."
+  },
+  "objectives": [
+    {
+      "id": "coastline",
+      "title": "Observe coastal change",
+      "description": "Compare simulated observations of selected coastal areas near Rosetta and Damietta.",
+      "scientificBasis": "Satellite-image time series have been used to study shoreline change along the Nile Delta.",
+      "sourceIds": [
+        "coastline-study-2021",
+        "esa-alexandria"
+      ]
+    },
+    {
+      "id": "wetlands",
+      "title": "Observe northern lakes and wetlands",
+      "description": "Identify visible differences in open water, wetland vegetation, and surrounding land use near Lake Manzala.",
+      "scientificBasis": "Copernicus Sentinel-2 imagery is used to observe the Damietta branch, Lake Manzala, agricultural land, aquaculture, and coastal ecosystems.",
+      "sourceIds": [
+        "copernicus-northern-egypt-2025"
+      ]
+    },
+    {
+      "id": "agriculture",
+      "title": "Track agricultural and urban land patterns",
+      "description": "Compare simulated image scenes to distinguish cultivated areas from expanding built-up areas.",
+      "scientificBasis": "NASA Earth Observatory has documented changes in farmland and urban areas around the Nile Delta using Landsat imagery.",
+      "sourceIds": [
+        "nasa-disappearing-farmland-2021",
+        "esa-delta-edge-2013"
+      ]
+    },
+    {
+      "id": "data_delivery",
+      "title": "Deliver observation data",
+      "description": "Store collected image data onboard and transmit it during simulated communication opportunities.",
+      "scientificBasis": "Gameplay objective; not a measured result from a real spacecraft."
+    }
+  ],
+  "baselineDesign": {
+    "inheritsExistingProjectBaseline": true,
+    "spacecraftSize": {
+      "value": "6U",
+      "dimensionsMm": [
+        100,
+        226.3,
+        366
+      ],
+      "maxMassKg": 12,
+      "status": "existing_project_baseline",
+      "source": "CubeSat Design Specification Rev. 14.1; see the existing src/data/mission_data.json."
+    },
+    "targetWetMassKg": {
+      "value": 8,
+      "status": "game_design_target",
+      "note": "Reuses the existing LUNAFORGE target. It is not the measured mass of a built satellite."
+    },
+    "orbitAltitudeKm": {
+      "value": 500,
+      "status": "selected_game_design_assumption",
+      "note": "Reuses the existing LUNAFORGE baseline; it is not a universal orbit for Earth observation."
+    },
+    "powerBudget": {
+      "averageGenerationW": 20,
+      "averageLoadW": 12,
+      "peakLoadW": 30,
+      "status": "existing_game_design_assumptions",
+      "note": "These are the project's simplified gameplay values. Do not treat them as measured spacecraft performance."
+    },
+    "batteryEnergyWh": {
+      "value": 88.8,
+      "status": "existing_project_reference_estimate",
+      "note": "Reuses the existing project baseline. The existing mission_data.json explains that the energy estimate depends on an assumed nominal pack voltage and should be checked against the exact vendor datasheet."
+    },
+    "storageGb": {
+      "value": 32,
+      "status": "game_design_assumption"
+    },
+    "budgetCredits": {
+      "value": 1000,
+      "status": "game_design_assumption",
+      "note": "Credits are in-game points, not USD."
+    }
+  },
+  "gameplayTargets": {
+    "minimumPriorityAreasObserved": {
+      "value": 3,
+      "status": "implemented_in_simulation_objective_evaluator",
+      "note": "The simulation records three named synthetic observation areas when a camera and ADCS are selected."
+    },
+    "minimumDataDownlinkedPercent": {
+      "value": 80,
+      "status": "implemented_in_simulation_objective_evaluator",
+      "note": "The simulation compares stored data with the selected communication rate and one assumed 10-minute ground-station contact per scenario day."
+    },
+    "cameraResolutionMetersPerPixel": {
+      "value": null,
+      "status": "not_yet_specified",
+      "note": "Do not claim a camera resolution until a real payload specification or an explicitly labeled gameplay model is added."
+    }
+  },
+  "compatibleComponentIds": {
+    "payload": [
+      "camera_basic",
+      "camera_advanced"
+    ],
+    "solar": [
+      "solar_body_6u",
+      "solar_deployable_6u"
+    ],
+    "battery": [
+      "battery_standard",
+      "battery_high_capacity"
+    ],
+    "communications": [
+      "comms_basic",
+      "comms_high_rate"
+    ],
+    "adcs": [
+      "adcs_basic",
+      "adcs_precise"
+    ],
+    "computer": [
+      "computer_standard"
+    ],
+    "eps": [
+      "eps_standard"
+    ],
+    "structure": [
+      "structure_6u"
+    ]
+  },
+  "dataQualityRules": [
+    "This is an educational mission scenario, not a flight-ready spacecraft design.",
+    "Research findings from Landsat or Sentinel imagery describe those missions and studies, not imagery captured by a fictional LUNAFORGE satellite.",
+    "Keep published facts, calculated estimates, and gameplay assumptions clearly separated.",
+    "Do not describe the current game camera components as having a verified ground resolution; the catalog does not specify one.",
+    "Do not describe the current simulation as processing real satellite imagery or live ground-station contacts.",
+    "Keep in-game credits distinct from real-world currency."
+  ],
+  "researchSources": [
+    {
+      "id": "nasa-disappearing-farmland-2021",
+      "title": "The Nile Delta's Disappearing Farmland",
+      "organization": "NASA Earth Observatory",
+      "year": 2021,
+      "url": "https://science.nasa.gov/earth/earth-observatory/the-nile-deltas-disappearing-farmland-149183/",
+      "supports": [
+        "Agricultural land and urban expansion around the Nile Delta"
+      ]
+    },
+    {
+      "id": "copernicus-northern-egypt-2025",
+      "title": "Coastal ecosystems in northern Egypt",
+      "organization": "European Union Space Policy / Copernicus",
+      "year": 2025,
+      "url": "https://eu-space.europa.eu/components/earth-observation-copernicus/image-of-the-day/coastal-ecosystems-northern-egypt",
+      "supports": [
+        "Sentinel-2 observation of the Damietta branch, Lake Manzala, agriculture, aquaculture, and coastal ecosystems"
+      ]
+    },
+    {
+      "id": "esa-alexandria",
+      "title": "Alexandria: Dynamic coastline at the Nile Delta",
+      "organization": "European Space Agency School Atlas",
+      "year": null,
+      "url": "https://esa-schoolatlas.eu/esa-schoolatlas/hydrosphere/alexandria/",
+      "supports": [
+        "Coastal dynamics and erosion context near Alexandria"
+      ]
+    },
+    {
+      "id": "esa-delta-edge-2013",
+      "title": "Earth from Space: Delta's edge",
+      "organization": "European Space Agency",
+      "year": 2013,
+      "url": "https://www.esa.int/Applications/Observing_the_Earth/Earth_from_Space_Delta_s_edge",
+      "supports": [
+        "Use of Landsat imagery to observe seasonal vegetation and land patterns in the eastern Nile Delta"
+      ]
+    },
+    {
+      "id": "coastline-study-2021",
+      "title": "Applying DSAS tool to detect coastal changes along Nile Delta, Egypt",
+      "organization": "Egyptian Journal of Remote Sensing and Space Science",
+      "year": 2021,
+      "doi": "10.1016/j.ejrs.2020.11.002",
+      "url": "https://www.sciencedirect.com/science/article/pii/S1110982320303379",
+      "supports": [
+        "Use of Landsat image time series and DSAS to study shoreline change along the Nile Delta"
+      ]
+    }
+  ],
+  "simulationModel": {
+    "status": "implemented_educational_gameplay_model",
+    "durationDays": 7,
+    "acceleratedTimelineSeconds": 28,
+    "observationAreas": [
+      {
+        "id": "coastline",
+        "name": "Rosetta and Damietta coast"
+      },
+      {
+        "id": "wetlands",
+        "name": "Lake Manzala wetlands"
+      },
+      {
+        "id": "agriculture",
+        "name": "Agricultural / urban transition"
+      }
+    ],
+    "cameraImagesPerDay": 3,
+    "groundStationContactsPerDay": 1,
+    "groundStationContactMinutes": 10,
+    "downlinkCalculation": "dataRateMbps × contactSeconds ÷ 8 = decimal MB per contact; multiplied by scenario days",
+    "note": "These cadence and contact-window values are game rules, not a real orbital-access or satellite-communications prediction."
+  }
+}
