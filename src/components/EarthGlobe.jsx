@@ -33,7 +33,7 @@ void main() {
   vec3 normal = normalize(vNormal);
   vec3 lightDirection = normalize(vec3(-0.38, 0.28, 0.88));
   float diffuse = max(dot(normal, lightDirection), 0.0);
-  float illumination = 0.22 + 0.78 * diffuse;
+  float illumination = 0.42 + 0.72 * diffuse;
   vec4 surface = texture2D(uTexture, vUv);
   gl_FragColor = vec4(surface.rgb * illumination, surface.a);
 }
