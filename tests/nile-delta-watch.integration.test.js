@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateMission } from "../src/engine/missionEngine.js";
-import { MISSION_BASELINE } from "../src/engine/componentsData.js";
+import { COMPONENTS_BY_ID } from "../src/engine/componentsData.js";
+import missionProfile from "../src/data/nile_delta_watch.json";
 import { evaluateNileDeltaMission } from "../src/simulation/missionObjectives.js";
 
 const validSelection = [
@@ -9,6 +10,12 @@ const validSelection = [
 ];
 
 describe("Nile Delta Watch mission objectives", () => {
+  it("references only component IDs that exist in the canonical runtime catalog", () => {
+    const referencedIds = Object.values(missionProfile.compatibleComponentIds).flat();
+    expect(referencedIds.length).toBeGreaterThan(0);
+    for (const id of referencedIds) expect(COMPONENTS_BY_ID[id]).toBeDefined();
+    expect(missionProfile.mission.id).toBe("nile_delta_watch");
+  });
   it("uses the selected solar panel's average output, not its peak rating as average generation", () => {
     const body = calculateMission(validSelection);
     const deployable = calculateMission(validSelection.map((id) => id === "solar_body_6u" ? "solar_deployable_6u" : id));
