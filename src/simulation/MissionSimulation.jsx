@@ -55,6 +55,8 @@ export default function MissionSimulation({
   const [observedAreas, setObservedAreas] = useState([]);
   const observedAreasRef = useRef([]);
   const [missedContacts, setMissedContacts] = useState(0);
+  const [missionXp, setMissionXp] = useState(0);
+  const [rewardToast, setRewardToast] = useState("");
   const [difficulty, setDifficulty] = useState("standard");
   const [orbitSessionKey, setOrbitSessionKey] = useState(0);
   const missedContactsRef = useRef(0);
@@ -131,6 +133,9 @@ export default function MissionSimulation({
         });
         setSimulation(finalState);
         setMissionOutcome(outcome);
+        const completionBonus = outcome.missionSuccess ? 500 : outcome.completedObjectives * 75;
+        setMissionXp((current) => current + completionBonus);
+        setRewardToast(outcome.missionSuccess ? `MISSION CLEAR +${completionBonus} XP` : `OBJECTIVES REWARDED +${completionBonus} XP`);
         addLog(
           "Mission evaluation completed",
           `${outcome.status}: ${outcome.completedObjectives}/${outcome.totalObjectives} objectives completed; ${outcome.dataDownlinkedPercent.toFixed(1)}% of stored data downlinked.`
@@ -159,6 +164,8 @@ export default function MissionSimulation({
     setOrbitSessionKey((key) => key + 1);
     setEvents([]);
     setMissionOutcome(null);
+    setMissionXp(0);
+    setRewardToast("");
     setObservedAreas([]);
     observedAreasRef.current = [];
     setMissedContacts(0);
@@ -172,8 +179,15 @@ export default function MissionSimulation({
   function handleOrbitTargetsCaptured(targetIds) {
     const areaMap = { rosetta: "coastline", damietta: "coastline", manzala: "wetlands", delta: "agriculture" };
     const areas = [...new Set(targetIds.map((id) => areaMap[id]).filter(Boolean))];
-    observedAreasRef.current = areas;
-    setObservedAreas(areas);
+    const newlyCaptured = areas.filter((area) => !observedAreasRef.current.includes(area));
+    observedAreasRef.current = [...new Set([...observedAreasRef.current, ...areas])];
+    setObservedAreas(observedAreasRef.current);
+    if (newlyCaptured.length) {
+      const reward = newlyCaptured.length * 150;
+      setMissionXp((current) => current + reward);
+      setRewardToast(`TARGET SECURED +${reward} XP`);
+      addLog("Science target secured", `${newlyCaptured.length} new observation area${newlyCaptured.length > 1 ? "s" : ""} added to the mission record. +${reward} XP`);
+    }
   }
 
   function handleWhatIf(scenario) {
@@ -194,6 +208,24 @@ export default function MissionSimulation({
           <span className={`lf-status lf-status-${simulation.status}`}>{simulation.status.toUpperCase()}</span>
         </div>
       </header>
+
+      <section className="lf-game-hud" aria-label="Mission game progress">
+        <div className="lf-game-hud-main">
+          <div>
+            <p className="lf-eyebrow">COMMANDER PROFILE / LIVE REWARDS</p>
+            <strong className="lf-xp-total">{missionXp.toLocaleString()} <span>XP</span></strong>
+            <p className="lf-muted">Earn experience by securing science targets and completing mission objectives.</p>
+          </div>
+          <div className="lf-rank-chip"><span>CADET RANK</span><strong>{missionXp >= 1000 ? "ORBITAL ACE" : missionXp >= 400 ? "FLIGHT OFFICER" : missionXp >= 150 ? "MISSION CADET" : "ROOKIE"}</strong></div>
+        </div>
+        <div className="lf-challenge-list">
+          <div className={observedAreas.includes("coastline") ? "is-earned" : ""}><span>01</span><strong>Coastline scout</strong><small>Secure Rosetta / Damietta</small><b>{observedAreas.includes("coastline") ? "✓ +150 XP" : "150 XP"}</b></div>
+          <div className={observedAreas.includes("wetlands") ? "is-earned" : ""}><span>02</span><strong>Wetland watcher</strong><small>Scan Lake Manzala</small><b>{observedAreas.includes("wetlands") ? "✓ +150 XP" : "150 XP"}</b></div>
+          <div className={observedAreas.includes("agriculture") ? "is-earned" : ""}><span>03</span><strong>Delta tracker</strong><small>Map the urban / farm edge</small><b>{observedAreas.includes("agriculture") ? "✓ +150 XP" : "150 XP"}</b></div>
+          <div className={missionOutcome?.missionSuccess ? "is-earned" : ""}><span>★</span><strong>Mission mastery</strong><small>Pass every mission requirement</small><b>{missionOutcome?.missionSuccess ? "✓ +500 XP" : "500 XP"}</b></div>
+        </div>
+        {rewardToast && <p className="lf-reward-toast" role="status">✦ {rewardToast}</p>}
+      </section>
 
       <section className="lf-sim-grid">
         <div className="lf-scene-card">

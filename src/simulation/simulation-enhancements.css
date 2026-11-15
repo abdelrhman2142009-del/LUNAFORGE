@@ -26,3 +26,28 @@
 .lfx-log-list p { color: #9aacc2; font-size: 10px; line-height: 1.45; margin: 3px 0 0; }
 .lfx-footer-note { margin: 14px 2px 0; }
 @media (max-width: 760px) { .lfx-feature-grid { grid-template-columns: 1fr; } }
+
+
+/* Game layer: commander HUD, rewards and responsive mission challenges */
+.lf-game-hud{margin:0 0 16px;padding:18px;border:1px solid rgba(86,216,232,.25);border-radius:16px;background:linear-gradient(120deg,rgba(19,49,77,.96),rgba(9,25,43,.96));box-shadow:0 14px 38px rgba(0,0,0,.16)}
+.lf-game-hud-main{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.lf-xp-total{display:block;font-size:clamp(27px,4vw,38px);letter-spacing:-.05em;color:#f1fbff}
+.lf-xp-total span{font-size:13px;color:#56d8e8;letter-spacing:.12em}
+.lf-rank-chip{min-width:150px;padding:12px 15px;border:1px solid rgba(86,216,232,.25);border-radius:12px;background:rgba(86,216,232,.07);display:grid;gap:5px}
+.lf-rank-chip span{font-size:9px;letter-spacing:.15em;color:#8faac5;font-weight:800}
+.lf-rank-chip strong{font-size:13px;color:#75e5ef}
+.lf-challenge-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:16px}
+.lf-challenge-list>div{min-width:0;padding:12px;border:1px solid rgba(142,180,220,.13);border-radius:11px;background:rgba(255,255,255,.035);display:grid;gap:5px;transition:background .2s,border-color .2s}
+.lf-challenge-list>div>span{font-size:10px;color:#56d8e8;font-weight:900}
+.lf-challenge-list strong{font-size:12px;color:#eaf5ff}
+.lf-challenge-list small{font-size:10px;line-height:1.4;color:#9aacc2}
+.lf-challenge-list b{font-size:10px;color:#ffd17a}
+.lf-challenge-list>div.is-earned{border-color:rgba(100,224,164,.38);background:rgba(74,190,131,.09)}
+.lf-challenge-list>div.is-earned b{color:#8ce4b7}
+.lf-reward-toast{margin:13px 0 0;padding:10px 12px;border-radius:9px;background:rgba(86,216,232,.1);color:#7ce8f0;font-size:11px;font-weight:900;letter-spacing:.1em;animation:lf-reward-in .35s ease-out}
+@keyframes lf-reward-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.lf-button,.lf-action{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.lf-button:hover,.lf-action:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 7px 20px rgba(86,216,232,.13)}
+.lf-button:focus-visible,.lf-action:focus-visible,.lf-difficulty-control select:focus-visible{outline:2px solid #75e5ef;outline-offset:3px}
+@media(max-width:760px){.lf-challenge-list{grid-template-columns:repeat(2,minmax(0,1fr))}.lf-game-hud-main{align-items:flex-start;flex-direction:column}.lf-rank-chip{width:100%}}
+@media(max-width:420px){.lf-challenge-list{grid-template-columns:1fr}}
