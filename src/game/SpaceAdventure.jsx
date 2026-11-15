@@ -128,6 +128,15 @@ export default function SpaceAdventure({ onBack = () => {} }) {
   const [hud, setHud] = useState({ score: 0, cores: 0, lives: 3, wave: 1 });
   const [bestScore, setBestScore] = useState(0);
 
+  useEffect(() => {
+    const savedBest = Number(window.localStorage.getItem("lunaforge-orbit-runner-best") || 0);
+    if (savedBest > 0) setBestScore(savedBest);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("lunaforge-orbit-runner-best", String(bestScore));
+  }, [bestScore]);
+
   function syncHud(game) {
     setHud({ score: game.score, cores: game.coresCollected, lives: game.lives, wave: game.wave });
     setBestScore((best) => Math.max(best, game.score));
