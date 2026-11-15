@@ -19,3 +19,5 @@
 @media(max-width:520px){.sa-journal-list{grid-template-columns:1fr}.sa-debrief{grid-template-columns:repeat(2,minmax(0,1fr))}.sa-profile-line span{font-size:7px}}
 
 .sa-flight-records{display:flex;flex-direction:column;gap:8px}.sa-flight-records>span{display:flex;flex-direction:column;gap:4px;color:#9bb2c9;font-size:9px}.sa-flight-records b{color:#d9f6ff;font-size:10px}.sa-flight-records i{font-style:normal;color:#809cb6;font-size:8px}
+
+.sa-challenge-objective{padding:8px 10px;border-left:2px solid #7ce8f0;background:rgba(80,190,220,.07);color:#d8f5ff!important;font-size:10px!important}
