@@ -17,5 +17,6 @@ describe("engineering-driven flight profile", () => {
     const date = new Date("2026-11-15T12:00:00Z");
     expect(getDailyChallenge(date)).toEqual(getDailyChallenge(date));
     expect(getDailyChallenge(date).coreGoal).toBeGreaterThanOrEqual(8);
+    expect(getDailyChallenge(date).objectiveText).toBeTruthy();
   });
 });
