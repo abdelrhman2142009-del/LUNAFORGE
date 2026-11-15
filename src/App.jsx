@@ -255,7 +255,13 @@ function App() {
       )}
 
       {/* PLAYABLE ARCADE GAME */}
-      {screen === "game" && <SpaceAdventure onBack={() => setScreen("home")} />}
+      {screen === "game" && (
+        <SpaceAdventure
+          onBack={() => setScreen("home")}
+          onEditDesign={() => setScreen("builder")}
+          engineeringReport={missionReport}
+        />
+      )}
 
       {/* MISSION SELECTION */}
 
