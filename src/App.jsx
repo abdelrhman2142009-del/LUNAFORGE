@@ -464,7 +464,7 @@ function App() {
       {/* SPACECRAFT BUILDER */}
 
       {screen === "builder" && (
-        <Builder onProceed={openAnalysis} />
+        <Builder onProceed={openAnalysis} initialComponents={missionReport?.selectedComponents || []} />
       )}
 
       {/* MISSION ANALYSIS */}
