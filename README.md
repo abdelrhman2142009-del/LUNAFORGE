@@ -1,16 +1,16 @@
 # LUNAFORGE
 
-LUNAFORGE is an educational space-engineering platform built with React and Vite. Players design an Earth-observation CubeSat, review simplified engineering trade-offs, and progress through a conceptual mission simulation.
+LUNAFORGE is an educational space-engineering platform built with React and Vite. Players design a CubeSat for Nile Delta Watch, review simplified engineering trade-offs, and simulate observations of the Nile Delta coast, wetlands, and agricultural / urban patterns.
 
 > **Educational-use notice:** LUNAFORGE uses simplified models and illustrative gameplay values. It is not a spacecraft design tool, flight dynamics simulator, safety assessment, or flight-readiness certification. Catalog values should only be described as real hardware specifications when their source and assumptions are documented.
 
 ## Project features
 
-- Mission briefing for the EarthWatch-1 / Earth-observation scenario.
+- Nile Delta Watch mission briefing, objectives, and research-backed regional context.
 - Spacecraft builder for selecting subsystem components.
 - Engineering analysis for mass, power, battery energy, data, storage, and game-budget checks.
 - Mission scoring and What-If design comparisons.
-- Conceptual mission sequence and data collection/downlink demonstration.
+- Seven-day fictional mission model with three observation areas, onboard storage, downlink tracking, and an objective-based final report (shown through an accelerated 28-second timeline).
 - Space-engineering glossary.
 
 ## Technology
@@ -65,7 +65,7 @@ LUNAFORGE/
 │   ├── simulation/       # Mission timeline, scenario events, simulation UI
 │   ├── App.jsx           # Main application navigation and screen routing
 │   └── main.jsx          # React entry point
-├── tests/                # Vitest engineering and simulation integration tests
+├── tests/                # Vitest engineering, simulation, and Nile Delta mission tests
 ├── integration.test.js   # Existing compatibility tests
 ├── INTEGRATION_CONTRACT.md
 ├── package.json
@@ -73,6 +73,10 @@ LUNAFORGE/
 ```
 
 The Member 5 integration branch brings the simulation module into `src/simulation/` and routes the app to that module. The earlier `src/components/MissionSimulation.jsx` remains in the repository as a legacy/alternate screen and should be reviewed before deletion. The component catalog used by the calculation engine lives at `src/engine/componentsData.js`.
+
+## Nile Delta Watch mission
+
+The mission profile and source metadata are in `src/data/nile_delta_watch.json`; research notes, requirements, and glossary are stored alongside it in `src/data/`. The runtime evaluator is `src/simulation/missionObjectives.js`. It records three synthetic observation areas and evaluates stored data and the 80% downlink target using a gameplay assumption of one 10-minute ground contact per scenario day. The simulation is educational only and does not model actual orbit access, satellite imagery, or radio-link performance.
 
 ## Engineering engine API
 
