@@ -951,9 +951,11 @@ function Builder({ onProceed }) {
           </button>
 
           <button
-            className="component-action"
+            className="component-action start-mission-button"
+            type="button"
             disabled={!isValid}
-           onClick={() => {
+            aria-disabled={!isValid}
+            onClick={() => {
   try {
     const engineAnalysis = runEngineeringAnalysis(selectedComponents);
 
@@ -982,8 +984,13 @@ function Builder({ onProceed }) {
               cursor: isValid ? "pointer" : "not-allowed",
             }}
           >
-            PROCEED TO MISSION ANALYSIS →
+            START MISSION →
           </button>
+          <p className="start-mission-hint" role="status">
+            {isValid
+              ? "Spacecraft checks passed. Start to review your mission briefing."
+              : `Complete the remaining requirements above to unlock launch: ${missingRequirements.map((item) => item.label).join(", ")}.`}
+          </p>
 
           <div className="builder-disclaimer">
             <strong>PROTOTYPE DATA</strong>
