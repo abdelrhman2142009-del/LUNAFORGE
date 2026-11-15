@@ -23,12 +23,12 @@
         226.3,
         366
       ],
-      "maxMassKg": 12.0,
+      "maxMassKg": 12,
       "status": "standard_limit",
       "source": "CubeSat Design Specification Rev. 14.1; NASA Small Spacecraft Technology State of the Art 2026, Structures chapter."
     },
     "targetWetMassKg": {
-      "value": 8.0,
+      "value": 8,
       "status": "game_design_target",
       "note": "A conservative design target below the 12 kg 6U limit. This is a project allocation, not the measured mass of a built satellite."
     },
@@ -41,7 +41,7 @@
     },
     "battery": {
       "exampleProduct": "GomSpace NanoPower BPX 3000mA (4S-2P configuration)",
-      "capacityAh": 6.0,
+      "capacityAh": 6,
       "nominalVoltageV": 14.8,
       "nominalEnergyWh": 88.8,
       "specificEnergyWhPerKg": 172,
@@ -98,7 +98,7 @@
     },
     {
       "subsystem": "ADCS",
-      "massKg": 1.0,
+      "massKg": 1,
       "status": "game_design_assumption"
     },
     {
@@ -152,7 +152,9 @@
       "peakPowerW": 27.8,
       "massKg": 0.45,
       "costCredits": 140,
-      "status": "mass_and_cost_are_game_assumptions; peak power is a NASA-listed product example"
+      "status": "NASA 2026 listed product example: 27.8 W and 62 W/kg; 0.45 kg is a calculated estimate; credits are gameplay assumptions.",
+      "exampleProduct": "Exobotics XO-PANEL 6U (body-mounted)",
+      "specificPowerWPerKg": 62
     },
     {
       "id": "solar_deployable_6u",
@@ -208,8 +210,39 @@
       "id": "adcs_precise",
       "name": "Precision attitude control",
       "peakPowerW": 5,
-      "massKg": 1.0,
+      "massKg": 1,
       "costCredits": 200,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "computer_standard",
+      "name": "Onboard computer and data handling",
+      "massKg": 0.4,
+      "peakPowerW": 2,
+      "storageGb": 32,
+      "costCredits": 100,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "eps_standard",
+      "name": "Electrical power management",
+      "massKg": 0.4,
+      "peakPowerW": 1,
+      "costCredits": 80,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "structure_6u",
+      "name": "6U structure and rails",
+      "massKg": 1.4,
+      "costCredits": 120,
+      "status": "game_design_assumption; 1.4 kg lies within NASA's listed 6U structure mass range"
+    },
+    {
+      "id": "thermal_harness",
+      "name": "Thermal control, harness and deployment hardware",
+      "massKg": 0.8,
+      "costCredits": 80,
       "status": "game_design_assumption"
     }
   ],
@@ -289,5 +322,7 @@
     "All values marked game_design_assumption are fixed game-balancing values, not verified hardware specifications.",
     "Do not present the 500 km scenario altitude as a universal Earth-observation orbit.",
     "Do not claim NASA imagery was captured by the fictional EarthWatch-1 satellite."
-  ]
+  ],
+  "runtimeCatalogSource": "src/engine/componentsData.js",
+  "componentCatalogPurpose": "Research/reference snapshot only. The runtime application uses src/engine/componentsData.js as its canonical component catalog."
 }
