@@ -3,12 +3,12 @@
 **Project:** LUNAFORGE  
 **Role:** Member 5 — Integration, Testing, Documentation, and Release Coordination  
 **Submission branch:** `member-5-integration-deliverables`  
-**Pull request:** [#2 — Member 5: simulation integration, tests, CI, docs, and demo](https://github.com/abdelrhman2142009-del/LUNAFORGE/pull/2)  
+**Pull request:** [#2 — Member 5: simulation integration, tests, CI, and documentation](https://github.com/abdelrhman2142009-del/LUNAFORGE/pull/2)  
 **Report date:** 15 November 2026
 
 ## 1. Submission summary
 
-Member 5's integration and release-preparation work has been implemented on the submission branch. The branch contains 18 changed files relative to `main`, including application integration, simulation modules, automated tests, continuous-integration configuration, and project handover documentation.
+Member 5's integration and release-preparation work has been implemented on the submission branch. The branch contains 19 changed files relative to `main`, covering application integration, simulation modules, automated tests, continuous-integration configuration, and project handover documentation.
 
 ## 2. Work delivered
 
@@ -17,15 +17,15 @@ Member 5's integration and release-preparation work has been implemented on the 
 - Added engineering and simulation integration test suites.
 - Added GitHub Actions CI for dependency installation, automated tests, dependency-audit reporting, and production build.
 - Updated the README and integration contract.
-- Added a QA checklist, demo script, and presentation outline.
+- Added a QA checklist, demo script, presentation outline, and this submission report.
 
 ## 3. Verification evidence
 
-The latest GitHub Actions run for the submission branch is **Run #39**, and its `verify` job completed successfully. The recorded successful steps include dependency installation, automated tests, dependency-audit report generation and upload, and the production build.
+The latest GitHub Actions run for the current submission branch head is **Run #41**, and its `verify` job completed successfully. Dependency installation, automated tests, dependency-audit report generation and upload, and the production build all passed.
 
-A previous successful verification run (#30) recorded **16 passing tests across 3 test files** and an npm audit report with **0 moderate, 0 high, and 0 critical vulnerabilities** after the Vitest update to 5.1.0.
+An earlier successful verification run (#30) recorded **16 passing tests across 3 test files** and an npm audit report with **0 moderate, 0 high, and 0 critical vulnerabilities** after the Vitest update to 5.1.0.
 
-Latest run: https://github.com/abdelrhman2142009-del/LUNAFORGE/actions/runs/43739199294
+Latest run: https://github.com/abdelrhman2142009-del/LUNAFORGE/actions/runs/43739796621
 
 ## 4. Review and validation status
 
