@@ -415,7 +415,7 @@ function Builder({ onProceed }) {
               </p>
               <div className="workshop-installed">
                 <span>{selectedComponents.length} / 8 SYSTEMS INSTALLED</span>
-                <div className="workshop-progress"><i style={{ width: `${Math.min(100, selectedComponents.length / 7 * 100)}%` }} /></div>
+                <div className="workshop-progress"><i style={{ width: `${Math.min(100, selectedComponents.length / 8 * 100)}%` }} /></div>
                 <div className="workshop-tags">
                   {["structure", "solar", "battery", "payload", "computer", "communication", "adcs", "eps"].map((slot) => (
                     <span className={selectedComponents.some((item) => item.slot === slot) ? "installed" : ""} key={slot}>
