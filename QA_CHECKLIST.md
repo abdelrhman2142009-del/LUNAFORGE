@@ -33,6 +33,7 @@ Use this checklist during the final team integration. Mark an item complete only
 
 ## Automated checks
 - [ ] `npm install` completes successfully.
+- [ ] A generated `package-lock.json` is committed so installs are reproducible.
 - [ ] `npm test` passes.
 - [ ] `npm run build` passes.
 - [ ] CI is green on the final PR.
