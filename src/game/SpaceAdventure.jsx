@@ -485,7 +485,6 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       if (running) frame = requestAnimationFrame(tick);
     };
 
-    let hudTimer = 0;
     frame = requestAnimationFrame(tick);
     return () => {
       running = false;
