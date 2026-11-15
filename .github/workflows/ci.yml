@@ -2,7 +2,7 @@ name: LUNAFORGE CI
 
 on:
   push:
-    branches: [main, member-5-integration-deliverables]
+    branches: [main, member-5-integration-deliverables, member-1-nile-delta-watch]
   pull_request:
     branches: [main]
 
