@@ -2,9 +2,9 @@ name: LUNAFORGE CI
 
 on:
   push:
-    branches: [main, member-5-integration-deliverables, member-1-nile-delta-watch]
+    branches: [main, member-5-integration-deliverables, member-1-nile-delta-watch, feature/lunaforge-full-campaign]
   pull_request:
-    branches: [main]
+    branches: [main, feature/orbit-runner-arcade]
 
 jobs:
   verify:
