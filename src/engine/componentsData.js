@@ -26,8 +26,8 @@ export const REQUIRED_CATEGORIES = [
 ];
 
 export const COMPONENT_CATALOG = [
-  { id: "camera_basic", category: "payload", name: "Basic Earth-observation camera", massKg: 0.5, activePowerW: 3, peakPowerW: 3, dataPerImageMB: 25, imagesPerDay: 20, costCredits: 120, scienceScore: 55, status: "game_design_assumption" },
-  { id: "camera_advanced", category: "payload", name: "Advanced Earth-observation camera", massKg: 0.8, activePowerW: 5, peakPowerW: 5, dataPerImageMB: 60, imagesPerDay: 20, costCredits: 220, scienceScore: 85, status: "game_design_assumption" },
+  { id: "camera_basic", category: "payload", name: "Basic Earth-observation camera", massKg: 0.5, activePowerW: 3, peakPowerW: 3, dataPerImageMB: 25, imagesPerDay: 3, costCredits: 120, scienceScore: 55, status: "game_design_assumption" },
+  { id: "camera_advanced", category: "payload", name: "Advanced Earth-observation camera", massKg: 0.8, activePowerW: 5, peakPowerW: 5, dataPerImageMB: 60, imagesPerDay: 3, costCredits: 220, scienceScore: 85, status: "game_design_assumption" },
 
   // Peak panel ratings are reference values. Average generation uses a
   // transparent 0.72 gameplay factor to represent illumination, eclipse,
