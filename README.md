@@ -13,6 +13,12 @@ LUNAFORGE is an educational space-engineering platform built with React and Vite
 - Seven-day fictional mission model with three observation areas, onboard storage, downlink tracking, and an objective-based final report (shown through an accelerated 28-second timeline).
 - Space-engineering glossary.
 
+## NASA Earth imagery
+
+The home screen and mission-control view include a NASA GIBS imagery explorer. It requests dated Terra MODIS, Aqua MODIS, and Suomi NPP VIIRS true-colour browse imagery for the Nile Delta, and uses NASA's Blue Marble global image as the Earth globe texture. The globe is a shaded, rotating textured sphere; the regional images are real NASA browse visualizations loaded from the NASA service.
+
+**Important:** the game still simulates spacecraft observations, mission events, engineering outcomes, and downlink quantities. The NASA images are not claimed to have been captured by the fictional LUNAFORGE satellite, and browse imagery should not be treated as calibrated scientific analysis data. See [NASA_DATA_SOURCES.md](./NASA_DATA_SOURCES.md) for source links, implementation details, and limitations.
+
 ## Technology
 
 - React 19
