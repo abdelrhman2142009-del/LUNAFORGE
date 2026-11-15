@@ -43,7 +43,7 @@ The 7 mission days describe the fictional mission period. The current applicatio
 | NDW-02 | Use a 6U design baseline | Briefing displays the 6U dimensions and labels 12 kg as the maximum, 8 kg as the game target | Implemented in mission briefing on feature branch |
 | NDW-03 | Observe priority areas | Scenario records completed observations for at least 3 priority areas | Implemented as a synthetic simulation objective |
 | NDW-04 | Cover coastal change | One completed observation relates to Rosetta or Damietta | Implemented as a synthetic observation objective |
-| NDW-05 | Cover wetlands | One completed observation relates to Lake Manzala | Mission data defined; simulation logic pending |
+| NDW-05 | Cover wetlands | One completed observation relates to Lake Manzala | Implemented as a synthetic observation objective |
 | NDW-06 | Cover agriculture / urban patterns | One completed observation relates to an agricultural/urban transition area | Mission data defined; simulation logic pending |
 | NDW-07 | Store image data | Generated data is accumulated and checked against selected onboard storage | Implemented: mission evaluator totals generated, stored, and transmitted data |
 | NDW-08 | Downlink collected data | Simulation records generated, queued, and transmitted data | Implemented: evaluator checks 80% downlink target against assumed daily contact capacity |
