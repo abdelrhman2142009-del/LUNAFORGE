@@ -7,7 +7,7 @@
   transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 2;
 }
 
@@ -38,8 +38,21 @@
   filter: saturate(1.12) contrast(1.06);
 }
 
+.lf-earth-globe-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.lf-earth-globe-canvas:active { cursor: grabbing; }
+.lf-earth-globe-canvas[data-fallback="true"] { display: none; }
+
 .lf-earth-globe-shade {
   position: absolute;
+  pointer-events: none;
   inset: 0;
   border-radius: 50%;
   background:
@@ -50,6 +63,7 @@
 
 .lf-earth-globe-atmosphere {
   position: absolute;
+  pointer-events: none;
   inset: -2px;
   border: 2px solid rgba(132, 213, 255, .55);
   border-radius: 50%;
