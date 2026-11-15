@@ -5,6 +5,8 @@ import Builder from "./components/Builder";
 import MissionSimulation from "./simulation/MissionSimulation";
 import { runEngineeringWhatIf } from "./engine/engineAdapter";
 import nileDeltaWatch from "./data/nile_delta_watch.json";
+import EarthGlobe from "./components/EarthGlobe";
+import NasaImageryPanel from "./components/NasaImageryPanel";
 const features = [
   {
     number: "01",
@@ -177,9 +179,7 @@ function App() {
                 <div className="orbit orbit-one" />
                 <div className="orbit orbit-two" />
 
-                <div className="earth">
-                  <div className="earth-glow" />
-                </div>
+                <EarthGlobe />
 
                 <div className="satellite">
                   <div className="solar-panel left-panel" />
@@ -204,6 +204,10 @@ function App() {
                 <span>MISSION CONCEPT / 001</span>
               </div>
             </div>
+          </section>
+
+          <section className="page-section" aria-label="NASA Earth observation explorer">
+            <NasaImageryPanel />
           </section>
 
           <section className="features-section" id="features">
