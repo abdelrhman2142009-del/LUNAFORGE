@@ -51,6 +51,8 @@ export default function MissionSimulation({
   const [missionOutcome, setMissionOutcome] = useState(null);
   const [observedAreas, setObservedAreas] = useState([]);
   const observedAreasRef = useRef([]);
+  const [missedContacts, setMissedContacts] = useState(0);
+  const missedContactsRef = useRef(0);
   const [logEntries, setLogEntries] = useState([
     makeLogEntry("Mission control ready", "The educational CubeSat scenario is ready to start."),
   ]);
@@ -85,6 +87,11 @@ export default function MissionSimulation({
 
   function handleEvent(event) {
     setEvents((previous) => [event, ...previous].slice(0, 5));
+    if (event.id === "temporary_comms_gap") {
+      missedContactsRef.current += 1;
+      setMissedContacts(missedContactsRef.current);
+      addLog("Ground-station contact missed", "One assumed daily contact was lost in this scenario.");
+    }
     const nextResources = applySpaceEvent(resourcesRef.current, event);
     resourcesRef.current = nextResources;
     setResources(nextResources);
@@ -122,6 +129,7 @@ export default function MissionSimulation({
           engineeringMission,
           observedAreas: observedAreasRef.current,
           durationDays: missionConfig?.scenario?.durationDays ?? 7,
+          missedContacts: missedContactsRef.current,
         });
         setSimulation(finalState);
         setMissionOutcome(outcome);
@@ -154,6 +162,8 @@ export default function MissionSimulation({
     setMissionOutcome(null);
     setObservedAreas([]);
     observedAreasRef.current = [];
+    setMissedContacts(0);
+    missedContactsRef.current = 0;
     setResources(initialResourceStatus);
     resourcesRef.current = initialResourceStatus;
     addLog("Simulation restarted", "The scenario was reset to its initial state.");
@@ -288,6 +298,7 @@ export default function MissionSimulation({
             <Metric label="Data stored" value={missionOutcome.storedDataMB.toFixed(1)} unit=" MB" />
             <Metric label="Data transmitted" value={missionOutcome.transmittedDataMB.toFixed(1)} unit=" MB" />
             <Metric label="Downlinked" value={missionOutcome.dataDownlinkedPercent.toFixed(1)} unit="%" />
+            <Metric label="Missed contacts" value={missionOutcome.missedContacts} />
           </div>
           <ul className="lfx-event-list">
             {missionOutcome.objectives.map((objective) => (
