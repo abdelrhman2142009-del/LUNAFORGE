@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { startSimulation } from "./simulationEngine.js";
 import { SIMULATION_STAGES, INITIAL_SIMULATION_STATE } from "./simulationStages.js";
 import { applySpaceEvent } from "./SpaceEvents.js";
-import { evaluateNileDeltaMission } from "./missionObjectives.js";
+import { NILE_DELTA_AREAS, evaluateNileDeltaMission } from "./missionObjectives.js";
 import WhatIfPanel from "./WhatIfPanel.jsx";
 import MissionLog from "./MissionLog.jsx";
 import "./simulation.css";
