@@ -60,3 +60,17 @@ These gaps should be addressed by the relevant engineering and simulation owners
 - European Union Space Policy. (2025, November 6). *Coastal ecosystems in northern Egypt*. https://eu-space.europa.eu/components/earth-observation-copernicus/image-of-the-day/coastal-ecosystems-northern-egypt
 - NASA Earth Observatory. (2021, December 15). *The Nile Delta's disappearing farmland*. https://science.nasa.gov/earth/earth-observatory/the-nile-deltas-disappearing-farmland-149183/
 - Abou Samra, R. M., & Ali, R. R. (2021). Applying DSAS tool to detect coastal changes along Nile Delta, Egypt. *The Egyptian Journal of Remote Sensing and Space Science, 24*(3), 463–470. https://doi.org/10.1016/j.ejrs.2020.11.002
+
+
+## Implemented educational gameplay model
+
+The feature branch now uses a simple, transparent simulation model:
+
+- Three synthetic observation areas: Rosetta/Damietta coast, Lake Manzala wetlands, and agricultural/urban transition.
+- The camera catalog creates three synthetic scenes per mission day. This is a game cadence, not a real revisit rate.
+- The scenario lasts seven mission days while the accelerated UI timeline lasts 28 seconds.
+- The model assumes one 10-minute ground-station contact per scenario day.
+- Data capacity per contact is estimated as Mbps × contact seconds ÷ 8, yielding decimal MB.
+- Mission success requires all three areas, storage of generated data, at least 80% downlink, and an engineering-feasible configuration.
+
+These values are explicit gameplay assumptions. They do not model orbital access, radio protocol overhead, link margin, antenna pointing, or actual ground-station scheduling.
