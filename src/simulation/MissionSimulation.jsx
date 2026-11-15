@@ -6,6 +6,7 @@ import { evaluateNileDeltaMission, NILE_DELTA_AREAS } from "./missionObjectives.
 import WhatIfPanel from "./WhatIfPanel.jsx";
 import MissionLog from "./MissionLog.jsx";
 import "./simulation.css";
+import EarthGlobe from "../components/EarthGlobe";
 import "./simulation-enhancements.css";
 
 function makeLogEntry(title, message) {
@@ -192,16 +193,13 @@ export default function MissionSimulation({
       <section className="lf-sim-grid">
         <div className="lf-scene-card">
           <div className="lf-scene-topline">
-            <span>ORBIT VIEW</span><span>2D SCHEMATIC · NOT TO SCALE</span>
+            <span>ORBIT VIEW</span><span>NASA BLUE MARBLE · TEXTURED 3D GLOBE</span>
           </div>
           <div className={`lf-space-scene ${isRunning ? "is-running" : ""} ${isPaused ? "is-paused" : ""}`}>
             <span className="lf-star lf-star-one" /><span className="lf-star lf-star-two" />
             <span className="lf-star lf-star-three" /><span className="lf-star lf-star-four" />
             <div className="lf-orbit-ring" />
-            <div className="lf-earth">
-              <span className="lf-earth-land lf-land-one" /><span className="lf-earth-land lf-land-two" />
-              <span className="lf-earth-glow" />
-            </div>
+            <EarthGlobe />
             <div className="lf-satellite-orbit">
               <div className="lf-satellite">
                 <span className="lf-sat-panel lf-sat-panel-left" /><span className="lf-sat-body" />
