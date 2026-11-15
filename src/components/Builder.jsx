@@ -118,8 +118,8 @@ const categories = [
 const MAX_MASS = 12;
 const MAX_BUDGET = 1000;
 
-function Builder({ onProceed }) {
-  const [selectedComponents, setSelectedComponents] = useState([]);
+function Builder({ onProceed, initialComponents = [] }) {
+  const [selectedComponents, setSelectedComponents] = useState(() => initialComponents);
   const [activeCategory, setActiveCategory] = useState("All Systems");
 
   const filteredComponents = useMemo(() => {
