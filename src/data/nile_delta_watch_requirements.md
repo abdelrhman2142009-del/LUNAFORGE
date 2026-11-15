@@ -39,18 +39,18 @@ The 7 mission days describe the fictional mission period. The current applicatio
 
 | ID | Requirement | Acceptance criterion | Current code status |
 |---|---|---|---|
-| NDW-01 | Select Nile Delta Watch as a mission | Mission selection and briefing show this mission name and its region | Pending UI integration |
-| NDW-02 | Use a 6U design baseline | Briefing displays the 6U dimensions and labels 12 kg as the maximum, 8 kg as the game target | Data available; UI review needed |
-| NDW-03 | Observe priority areas | Scenario records completed observations for at least 3 priority areas | Proposed gameplay target; not implemented |
-| NDW-04 | Cover coastal change | One completed observation relates to Rosetta or Damietta | Mission data defined; simulation logic pending |
+| NDW-01 | Select Nile Delta Watch as a mission | Mission selection and briefing show this mission name and its region | Implemented on feature branch; requires review and merge |
+| NDW-02 | Use a 6U design baseline | Briefing displays the 6U dimensions and labels 12 kg as the maximum, 8 kg as the game target | Implemented in mission briefing on feature branch |
+| NDW-03 | Observe priority areas | Scenario records completed observations for at least 3 priority areas | Implemented as a synthetic simulation objective |
+| NDW-04 | Cover coastal change | One completed observation relates to Rosetta or Damietta | Implemented as a synthetic observation objective |
 | NDW-05 | Cover wetlands | One completed observation relates to Lake Manzala | Mission data defined; simulation logic pending |
 | NDW-06 | Cover agriculture / urban patterns | One completed observation relates to an agricultural/urban transition area | Mission data defined; simulation logic pending |
-| NDW-07 | Store image data | Generated data is accumulated and checked against selected onboard storage | Existing engine has simplified daily-data estimate; full simulation tracking pending |
-| NDW-08 | Downlink collected data | Simulation records generated, queued, and transmitted data | Proposed 80% gameplay target; not implemented |
-| NDW-09 | Complete resource checks | Mass, average power, battery energy, storage, and credits are shown with units | Engineering engine exists; solar-power calculation needs review |
-| NDW-10 | Show final outcome | Final report lists completed areas, data stored/transmitted, events, score, and failed objectives | Current simulation reports timeline completion only; mission-specific report pending |
-| NDW-11 | Preserve scientific accuracy | Every published value, derived estimate, and game assumption is labelled | Research files contain classifications; UI review pending |
-| NDW-12 | Keep educational scope clear | UI states that the model is not a flight prediction or certified spacecraft design | Existing simulation disclaimer present; mission briefing should repeat it |
+| NDW-07 | Store image data | Generated data is accumulated and checked against selected onboard storage | Implemented: mission evaluator totals generated, stored, and transmitted data |
+| NDW-08 | Downlink collected data | Simulation records generated, queued, and transmitted data | Implemented: evaluator checks 80% downlink target against assumed daily contact capacity |
+| NDW-09 | Complete resource checks | Mass, average power, battery energy, storage, and credits are shown with units | Corrected: solar average generation and subsystem load are calculated separately |
+| NDW-10 | Show final outcome | Final report lists completed areas, data stored/transmitted, events, score, and failed objectives | Implemented: final report lists objectives, area coverage, data totals, downlink percentage, and failure reasons |
+| NDW-11 | Preserve scientific accuracy | Every published value, derived estimate, and game assumption is labelled | Research, mission profile, and engine assumptions are labelled; UI uses explicit educational disclaimer |
+| NDW-12 | Keep educational scope clear | UI states that the model is not a flight prediction or certified spacecraft design | Implemented in mission briefing and simulation final report |
 
 ## 4. Proposed gameplay targets
 
@@ -80,7 +80,7 @@ The intended data flow is:
 6. Observation, storage, and downlink progress are tracked.
 7. The final report evaluates the mission objectives and resource limits.
 
-The current app still uses the generic Earth-observation briefing and the engineering baseline is named EarthWatch-1. Do not claim Nile Delta Watch is fully playable until the UI, engine metadata, and simulation objectives are connected.
+The feature branch now connects Nile Delta Watch to mission selection, briefing, engineering baseline, Builder resource checks, simulation objective tracking, and final mission evaluation. It remains subject to repository test/build verification and team review before merging.
 
 ## 7. Source of truth
 
