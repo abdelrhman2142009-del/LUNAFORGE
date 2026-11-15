@@ -21,7 +21,7 @@ Member 5's integration and release-preparation work has been implemented on the 
 
 ## 3. Verification evidence
 
-The latest GitHub Actions run for the current submission branch head is **Run #41**, and its `verify` job completed successfully. Dependency installation, automated tests, dependency-audit report generation and upload, and the production build all passed.
+The latest GitHub Actions run for the application and test implementation is **Run #41**, and its `verify` job completed successfully. Dependency installation, automated tests, dependency-audit report generation and upload, and the production build all passed. A subsequent documentation-only commit updated this submission report.
 
 An earlier successful verification run (#30) recorded **16 passing tests across 3 test files** and an npm audit report with **0 moderate, 0 high, and 0 critical vulnerabilities** after the Vitest update to 5.1.0.
 
