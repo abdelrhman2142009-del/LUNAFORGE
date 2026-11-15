@@ -29,7 +29,7 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-export default function OrbitMissionControl({ engineeringMission }) {
+export default function OrbitMissionControl({ engineeringMission, onTargetsCaptured = () => {} }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [speed, setSpeed] = useState(120);
@@ -88,7 +88,11 @@ export default function OrbitMissionControl({ engineeringMission }) {
       log("Capture blocked: battery reserve is too low.");
       return;
     }
-    setCaptured((items) => [...items, target.id]);
+    setCaptured((items) => {
+      const next = [...items, target.id];
+      onTargetsCaptured(next);
+      return next;
+    });
     setStoredDataMb((value) => value + 120);
     setBatteryPercent((value) => clamp(value - 4, 0, 100));
     log(`Image captured: ${target.name} · 120 MB added to onboard storage.`);
@@ -98,6 +102,7 @@ export default function OrbitMissionControl({ engineeringMission }) {
     setElapsedSeconds(0);
     setRunning(false);
     setCaptured([]);
+    onTargetsCaptured([]);
     setStoredDataMb(0);
     setDownlinkedDataMb(0);
     setBatteryPercent(100);
