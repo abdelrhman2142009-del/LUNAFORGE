@@ -59,19 +59,20 @@ The repository currently defines an ESLint script, but an ESLint configuration f
 ```text
 LUNAFORGE/
 ├── src/
-│   ├── components/       # React screens and UI, including Builder and MissionSimulation
+│   ├── components/       # React Builder and supporting interface components
 │   ├── data/             # Research and glossary data
 │   ├── engine/           # Component catalog, calculations, scoring, What-If, UI adapter
-│   ├── App.jsx           # Main application navigation
+│   ├── simulation/       # Mission timeline, scenario events, simulation UI
+│   ├── App.jsx           # Main application navigation and screen routing
 │   └── main.jsx          # React entry point
-├── tests/                # Vitest integration and engineering tests
+├── tests/                # Vitest engineering and simulation integration tests
 ├── integration.test.js   # Existing compatibility tests
 ├── INTEGRATION_CONTRACT.md
 ├── package.json
 └── vite.config.js
 ```
 
-The current main branch places `MissionSimulation.jsx` under `src/components/`; it does not currently contain a separate `src/simulation/` directory. The component catalog used by the calculation engine currently lives at `src/engine/componentsData.js`. Keep the contract aligned with the actual files unless the team agrees to a coordinated refactor.
+The Member 5 integration branch brings the simulation module into `src/simulation/` and routes the app to that module. The earlier `src/components/MissionSimulation.jsx` remains in the repository as a legacy/alternate screen and should be reviewed before deletion. The component catalog used by the calculation engine lives at `src/engine/componentsData.js`.
 
 ## Engineering engine API
 
@@ -126,10 +127,10 @@ Do not commit directly to `main` for normal feature work. Avoid having multiple 
 ## Known integration decisions to resolve
 
 See [INTEGRATION_CONTRACT.md](./INTEGRATION_CONTRACT.md) for the current interfaces and the remaining ownership decisions, especially:
-- whether the simulation logic should remain inside `src/components/MissionSimulation.jsx` or be separated into `src/simulation/`;
-- whether mission data should be introduced as a dedicated `src/data/missionData.js` module;
-- keeping game credits distinct from USD;
-- agreeing which module is the single source of truth for the component catalog.
+- review whether the legacy `src/components/MissionSimulation.jsx` can be removed after the new `src/simulation/MissionSimulation.jsx` is accepted;
+- decide whether mission data should be introduced as a dedicated `src/data/missionData.js` module;
+- keep game credits distinct from USD;
+- keep `src/engine/componentsData.js` as the single source of truth for the calculation engine catalog.
 
 ## Security and authentication
 
