@@ -512,7 +512,12 @@ function App() {
                 </div>
 
                 <div>
-                  <span>Power consumption</span>
+                  <span>Estimated average spacecraft load</span>
+                  <strong>{(engineAnalysis?.mission?.metrics?.averageLoadW ?? 0).toFixed(1)} W</strong>
+                </div>
+
+                <div>
+                  <span>Selected subsystem active-power ratings</span>
                   <strong>{missionReport.totals.power.toFixed(1)} W</strong>
                 </div>
 
