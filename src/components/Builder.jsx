@@ -951,9 +951,10 @@ function Builder({ onProceed }) {
           </button>
 
           <button
-            className="component-action"
-            disabled={!isValid}
-           onClick={() => {
+            className="component-action start-mission-button"
+            type="button"
+            disabled={selectedComponents.length === 0}
+            onClick={() => {
   try {
     const engineAnalysis = runEngineeringAnalysis(selectedComponents);
 
@@ -978,12 +979,19 @@ function Builder({ onProceed }) {
             style={{
               width: "100%",
               marginTop: "12px",
-              opacity: isValid ? 1 : 0.4,
-              cursor: isValid ? "pointer" : "not-allowed",
+              opacity: selectedComponents.length ? 1 : 0.45,
+              cursor: selectedComponents.length ? "pointer" : "not-allowed",
             }}
           >
-            PROCEED TO MISSION ANALYSIS →
+            START MISSION / REVIEW DESIGN →
           </button>
+          <p className="start-mission-hint" role="status">
+            {selectedComponents.length === 0
+              ? "Select components or load a design preset to continue."
+              : isValid
+                ? "All workshop checks passed. Continue to your mission briefing."
+                : `Design has ${missingRequirements.length} outstanding workshop check(s). You can still open the briefing and review what needs improvement.`}
+          </p>
 
           <div className="builder-disclaimer">
             <strong>PROTOTYPE DATA</strong>
