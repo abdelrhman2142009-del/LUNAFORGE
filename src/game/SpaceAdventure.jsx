@@ -508,7 +508,7 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
 
       if (game.comboTimer <= 0) game.combo = 0;
       if (game.coresCollected >= game.coreGoal && game.beaconReached) {
-        game.score += 250;
+        game.score += 250 + game.challenge.bonus;
         burst(game, ship.x, ship.y, "#8df7ff", 42, 250);
         syncHud(game);
         setAchievements((current) => [...new Set([...current, "first-rescue", ...(game.score >= 2000 ? ["high-orbit-score"] : []), ...(game.discoveries.length > 0 ? ["curious-pilot"] : [])])]);
@@ -607,6 +607,15 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
               <span>{status === "won" ? "MISSION COMPLETE" : status === "lost" ? "MISSION FAILED" : status === "paused" ? "PAUSED" : "FLIGHT BRIEFING"}</span>
               <h2>{overlayTitle}</h2>
               <p>{overlayText}</p>
+              {(status === "won" || status === "lost") && (
+                <div className="sa-debrief">
+                  <div><small>FINAL SCORE</small><strong>{gameRef.current.score.toLocaleString()}</strong></div>
+                  <div><small>DATA CORES</small><strong>{gameRef.current.coresCollected}/{gameRef.current.coreGoal}</strong></div>
+                  <div><small>FLIGHT TIME</small><strong>{Math.floor(gameRef.current.elapsed)}s</strong></div>
+                  <div><small>DISCOVERIES</small><strong>{gameRef.current.discoveries.length}</strong></div>
+                  <p>{status === "won" ? "RESCUE CONFIRMED · DAILY BONUS INCLUDED" : "FLIGHT LOG SAVED · REVIEW YOUR ENGINEERING LOADOUT"}</p>
+                </div>
+              )}
               {status === "ready" && <div className="sa-objectives"><span>01 / RECOVER 8 DATA CORES</span><span>02 / RESTORE THE GOLD RELAY</span><span>03 / SURVIVE THE SOLAR FLARE</span></div>}
               <button onClick={status === "ready" || status === "won" || status === "lost" ? startGame : () => setStatus("playing")}>
                 {status === "ready" ? "▶ LAUNCH MISSION" : status === "paused" ? "▶ RESUME FLIGHT" : "↻ FLY AGAIN"}
