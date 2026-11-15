@@ -52,6 +52,19 @@ describe("Nile Delta Watch mission objectives", () => {
     expect(outcome.missionSuccess).toBe(false);
   });
 
+  it("reduces transmitted data when a ground-station contact is missed", () => {
+    const engineeringMission = calculateMission(validSelection);
+    const outcome = evaluateNileDeltaMission({
+      engineeringMission,
+      durationDays: 7,
+      missedContacts: 2,
+    });
+    expect(outcome.availableContacts).toBe(5);
+    expect(outcome.transmittedDataMB).toBe(375);
+    expect(outcome.dataDownlinkedPercent).toBeCloseTo(71.4286, 3);
+    expect(outcome.missionSuccess).toBe(false);
+  });
+
   it("fails the data-delivery objective when downlink capacity is insufficient", () => {
     const engineeringMission = calculateMission(validSelection);
     const limitedDownlink = {
