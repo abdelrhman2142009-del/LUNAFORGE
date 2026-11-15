@@ -95,7 +95,7 @@ const components = [
     downlinkSpeedMbps: 2,
     cost: 220,
   },
-  { id: "power-2", slot: "solar", name: "6U Deployable Solar Array", category: "Power", description: "Deployable array with a higher peak-power rating; game values are simplified.", mass: 0.78, power: 0, solarPowerOutput: 57.6, cost: 200 },
+  { id: "power-2", slot: "solar", name: "6U Deployable Solar Array", category: "Power", description: "Deployable array with a higher peak-power rating; game values are simplified.", mass: 0.78, power: 0, solarPowerOutput: 57.6, cost: 230 },
   { id: "battery-2", slot: "battery", name: "High-capacity Battery Pack", category: "Power", description: "Higher energy storage for eclipse and peak-load support.", mass: 0.52, power: 0, batteryCapacityWh: 88.8, cost: 180 },
   { id: "adcs-1", slot: "adcs", name: "Basic Attitude Control (ADCS)", category: "Attitude Control", description: "Determines and controls spacecraft orientation for Earth observation.", mass: 0.6, power: 2, cost: 100 },
   { id: "adcs-2", slot: "adcs", name: "Precision Attitude Control (ADCS)", category: "Attitude Control", description: "Higher precision pointing with increased resource demand.", mass: 1.0, power: 5, cost: 200 },
