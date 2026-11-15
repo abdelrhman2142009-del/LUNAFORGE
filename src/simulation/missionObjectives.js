@@ -10,6 +10,7 @@ export function evaluateNileDeltaMission({
   engineeringMission,
   observedAreas = NILE_DELTA_AREAS.map((area) => area.id),
   durationDays = MISSION_BASELINE.scenarioDurationDays,
+  missedContacts = 0,
 } = {}) {
   const metrics = engineeringMission?.metrics || {};
   const selectedIds = engineeringMission?.selectedComponentIds || [];
@@ -23,7 +24,8 @@ export function evaluateNileDeltaMission({
   const generatedDataMB = Number(metrics.dataPerDayMB || 0) * durationDays;
   const storageCapacityMB = Number(metrics.storageGb || 0) * 1024;
   const storedDataMB = Math.min(generatedDataMB, storageCapacityMB);
-  const contactCapacityMB = Number(metrics.downlinkCapacityMBPerContact || 0) * durationDays;
+  const availableContacts = Math.max(0, durationDays - missedContacts);
+  const contactCapacityMB = Number(metrics.downlinkCapacityMBPerContact || 0) * availableContacts;
   const transmittedDataMB = Math.min(storedDataMB, contactCapacityMB);
   const dataDownlinkedPercent = storedDataMB > 0
     ? (transmittedDataMB / storedDataMB) * 100
@@ -60,6 +62,8 @@ export function evaluateNileDeltaMission({
     queuedDataMB: Math.max(0, storedDataMB - transmittedDataMB),
     dataDownlinkedPercent,
     downlinkTargetPercent: downlinkTarget,
+    missedContacts,
+    availableContacts,
     objectives,
     completedObjectives,
     totalObjectives: objectives.length,
