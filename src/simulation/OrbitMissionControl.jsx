@@ -48,6 +48,7 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
   const cameraSelected = engineeringMission?.selectedComponentIds?.some((id) => id === "camera_basic" || id === "camera_advanced");
   const adcsSelected = engineeringMission?.selectedComponentIds?.some((id) => id === "adcs_basic" || id === "adcs_precise");
   const downlinkMbps = Number(engineeringMission?.metrics?.downlinkRateMbps) || 1;
+  const storageCapacityMb = Math.max(0, Number(engineeringMission?.metrics?.storageGb || 0) * 1024);
   const missionComplete = elapsedSeconds >= MISSION_DURATION_SECONDS;
 
   useEffect(() => {
@@ -89,6 +90,10 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
       log("Capture blocked: battery reserve is too low.");
       return;
     }
+    if (storageCapacityMb <= 0 || storedDataMb + 120 > storageCapacityMb) {
+      log("Capture blocked: onboard storage is full or no storage capacity is configured.");
+      return;
+    }
     const nextCaptured = [...captured, target.id];
     setCaptured(nextCaptured);
     onTargetsCaptured(nextCaptured);
@@ -110,6 +115,48 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
 
   const orbitProgress = (orbit.phaseDeg / 360) * 100;
   const downlinkPercent = storedDataMb > 0 ? (downlinkedDataMb / storedDataMb) * 100 : 0;
+  const observedAreas = new Set(
+    captured.map((id) => id === "rosetta" || id === "damietta" ? "coastline" : id === "manzala" ? "wetlands" : "agriculture")
+  );
+  const contractRows = [
+    {
+      id: "core-survey",
+      title: "Complete the regional survey",
+      detail: `${observedAreas.size} / 3 distinct science areas recorded`,
+      complete: observedAreas.size >= 3,
+      reward: 300,
+      kind: "PRIMARY",
+    },
+    {
+      id: "full-coverage",
+      title: "Map all four target sites",
+      detail: `${captured.length} / 4 locations captured`,
+      complete: captured.length === TARGETS.length,
+      reward: 150,
+      kind: "BONUS",
+    },
+    {
+      id: "data-delivery",
+      title: "Deliver at least 80% of collected data",
+      detail: `${downlinkPercent.toFixed(0)}% transmitted to Cairo`,
+      complete: downlinkPercent >= 80,
+      reward: 200,
+      kind: "BONUS",
+    },
+    {
+      id: "power-reserve",
+      title: "Finish with a 25% battery reserve",
+      detail: missionComplete ? `${batteryPercent.toFixed(1)}% remaining` : "Evaluated when the seven-day mission ends",
+      complete: missionComplete && batteryPercent >= 25,
+      reward: 100,
+      kind: "BONUS",
+    },
+  ];
+  const earnedContractPoints = contractRows.reduce(
+    (total, contract) => total + (contract.complete ? contract.reward : 0),
+    0
+  );
+  const possibleContractPoints = contractRows.reduce((total, contract) => total + contract.reward, 0);
 
   return (
     <section className="lf-orbit-game">
@@ -145,7 +192,7 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
         <div className="lf-orbit-ops">
           <div className="lf-orbit-resource-grid">
             <div><small>BATTERY</small><strong>{batteryPercent.toFixed(1)}%</strong><div className="lf-orbit-meter"><span style={{ width: `${batteryPercent}%` }} /></div></div>
-            <div><small>ONBOARD STORAGE</small><strong>{storedDataMb.toFixed(0)} MB</strong><div className="lf-orbit-meter"><span style={{ width: `${Math.min(100, storedDataMb / 12.8)}%` }} /></div></div>
+            <div><small>ONBOARD STORAGE</small><strong>{storedDataMb.toFixed(0)} / {storageCapacityMb.toFixed(0)} MB</strong><div className="lf-orbit-meter"><span style={{ width: `${storageCapacityMb > 0 ? Math.min(100, (storedDataMb / storageCapacityMb) * 100) : 0}%` }} /></div></div>
             <div><small>DOWNLINKED</small><strong>{downlinkedDataMb.toFixed(1)} MB</strong><div className="lf-orbit-meter"><span style={{ width: `${downlinkPercent}%` }} /></div></div>
           </div>
 
@@ -163,8 +210,8 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
             <span>{targetInView ? "TARGET IN CAMERA FOOTPRINT" : "TARGET NOT CURRENTLY VISIBLE"}</span>
             <small>{target.science} · {target.latitudeDeg.toFixed(1)}°N, {target.longitudeDeg.toFixed(1)}°E</small>
           </div>
-          <button type="button" className="lf-orbit-capture" onClick={captureTarget} disabled={captured.includes(target.id) || missionComplete}>
-            {captured.includes(target.id) ? "TARGET ALREADY CAPTURED" : "CAPTURE IMAGE · 120 MB"}
+          <button type="button" className="lf-orbit-capture" onClick={captureTarget} disabled={captured.includes(target.id) || missionComplete || !cameraSelected || !adcsSelected || batteryPercent < 5 || storageCapacityMb <= 0 || storedDataMb + 120 > storageCapacityMb}>
+            {captured.includes(target.id) ? "TARGET ALREADY CAPTURED" : !cameraSelected || !adcsSelected ? "CAMERA + ADCS REQUIRED" : storedDataMb + 120 > storageCapacityMb ? "STORAGE CAPACITY REACHED" : "CAPTURE IMAGE · 120 MB"}
           </button>
           <div className="lf-orbit-controls">
             <button type="button" onClick={() => setRunning((value) => !value)} disabled={missionComplete}>{running ? "PAUSE ORBIT" : "START / RESUME ORBIT"}</button>
@@ -175,6 +222,27 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
               {SPEEDS.map((value) => <option key={value} value={value}>{value}×</option>)}
             </select>
           </label>
+          <section className="lf-orbit-contracts" aria-label="Mission contracts">
+            <div className="lf-orbit-contract-heading">
+              <div>
+                <strong>MISSION CONTRACTS</strong>
+                <small>Complete objectives to earn mission points</small>
+              </div>
+              <span>{earnedContractPoints} / {possibleContractPoints} PTS</span>
+            </div>
+            <div className="lf-orbit-contract-list">
+              {contractRows.map((contract) => (
+                <div className={`lf-orbit-contract ${contract.complete ? "is-complete" : ""}`} key={contract.id}>
+                  <span className="lf-contract-check">{contract.complete ? "✓" : "○"}</span>
+                  <div>
+                    <small>{contract.kind} CONTRACT · {contract.reward} PTS</small>
+                    <strong>{contract.title}</strong>
+                    <p>{contract.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
           <div className="lf-orbit-objectives">
             <strong>MISSION OBJECTIVES</strong>
             {TARGETS.map((item) => <span key={item.id} className={captured.includes(item.id) ? "is-captured" : ""}>{captured.includes(item.id) ? "✓" : "○"} {item.name}</span>)}

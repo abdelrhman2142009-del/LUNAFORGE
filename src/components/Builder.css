@@ -106,6 +106,34 @@
   white-space: nowrap;
 }
 
+.workshop-presets {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 0 20px;
+  padding: 15px 17px;
+  border: 1px solid rgba(83,190,232,.22);
+  border-radius: 10px;
+  background: rgba(53,182,232,.045);
+}
+.workshop-presets strong { display: block; color: var(--text); font-size: 13px; }
+.workshop-presets p { margin: 5px 0 0; color: var(--text-soft); font-size: 10px; line-height: 1.6; }
+.workshop-presets button {
+  min-height: 40px;
+  flex-shrink: 0;
+  padding: 0 14px;
+  border: 1px solid var(--border-bright);
+  border-radius: 6px;
+  background: rgba(53,182,232,.12);
+  color: var(--blue-light);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  transition: background .2s ease, transform .2s ease;
+}
+.workshop-presets button:hover { background: rgba(53,182,232,.22); transform: translateY(-1px); }
+
 .builder-categories {
   display: flex;
   flex-wrap: wrap;
@@ -623,4 +651,77 @@
   .builder-sidebar {
     padding: 18px;
   }
+}
+
+
+/* Multiple engineering strategies in the spacecraft workshop */
+.workshop-presets {
+  display: block;
+}
+.workshop-presets-heading {
+  margin-bottom: 14px;
+}
+.workshop-presets-heading > strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 14px;
+}
+.workshop-presets-heading p {
+  max-width: 680px;
+  margin: 6px 0 0;
+  color: var(--text-soft);
+  font-size: 10px;
+  line-height: 1.65;
+}
+.workshop-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.workshop-preset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 142px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: linear-gradient(145deg, rgba(20,48,72,.8), rgba(7,22,37,.9));
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s ease, transform .2s ease, background .2s ease;
+}
+.workshop-preset-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-bright);
+  background: rgba(53,182,232,.09);
+}
+.workshop-preset-card > span {
+  color: var(--blue-light);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.workshop-preset-card > strong {
+  font-size: 12px;
+}
+.workshop-preset-card > small {
+  color: var(--text-soft);
+  font-size: 9px;
+  line-height: 1.55;
+}
+.workshop-preset-card > em {
+  margin-top: auto;
+  color: var(--blue-light);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .6px;
+}
+@media (max-width: 650px) {
+  .workshop-preset-grid { grid-template-columns: 1fr; }
+  .workshop-preset-card { min-height: 0; }
 }

@@ -195,6 +195,37 @@ function Builder({ onProceed }) {
     setSelectedComponents([]);
   };
 
+  const loadPreset = (presetIds) => {
+    const nextSelection = presetIds
+      .map((id) => components.find((item) => item.id === id))
+      .filter(Boolean);
+    setSelectedComponents(nextSelection);
+  };
+
+  const spacecraftPresets = [
+    {
+      id: "balanced",
+      name: "Balanced Explorer",
+      description: "A dependable starting design for the full Nile Delta mission.",
+      focus: "BALANCED",
+      ids: ["structure-1", "power-1", "battery-1", "camera-1", "computer-1", "communication-1", "adcs-1", "eps-1"],
+    },
+    {
+      id: "detail",
+      name: "High-Detail Mapper",
+      description: "Upgrades the camera for larger image files and higher science potential.",
+      focus: "IMAGE QUALITY",
+      ids: ["structure-1", "power-1", "battery-1", "camera-2", "computer-1", "communication-1", "adcs-1", "eps-1"],
+    },
+    {
+      id: "endurance",
+      name: "Long-Endurance Scout",
+      description: "Adds battery capacity to support longer operations between charging opportunities.",
+      focus: "BATTERY RESERVE",
+      ids: ["structure-1", "power-1", "battery-2", "camera-1", "computer-1", "communication-1", "adcs-1", "eps-1"],
+    },
+  ];
+
   // RESOURCE LIMITS
 
   const massExceeded = totals.mass > MAX_MASS;
@@ -373,6 +404,67 @@ function Builder({ onProceed }) {
               {selectedComponents.length} SELECTED
             </span>
           </div>
+
+          <section className="workshop-preview" aria-label="Live spacecraft preview">
+            <div className="workshop-preview-copy">
+              <span className="builder-overline">LIVE ASSEMBLY / CONCEPT VIEW</span>
+              <h3>{selectedComponents.length ? "Your spacecraft is taking shape" : "Your spacecraft starts here"}</h3>
+              <p>
+                Install systems from the hangar and watch the spacecraft update.
+                This is a visual game preview, not a manufacturing drawing.
+              </p>
+              <div className="workshop-installed">
+                <span>{selectedComponents.length} / 8 SYSTEMS INSTALLED</span>
+                <div className="workshop-progress"><i style={{ width: `${Math.min(100, selectedComponents.length / 8 * 100)}%` }} /></div>
+                <div className="workshop-tags">
+                  {["structure", "solar", "battery", "payload", "computer", "communication", "adcs", "eps"].map((slot) => (
+                    <span className={selectedComponents.some((item) => item.slot === slot) ? "installed" : ""} key={slot}>
+                      {selectedComponents.some((item) => item.slot === slot) ? "✓ " : "○ "}{slot.toUpperCase()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="workshop-stage">
+              <div className="workshop-orbit-ring" />
+              <div className="workshop-satellite">
+                {selectedComponents.some((item) => item.slot === "solar") && <div className="workshop-wing workshop-wing-left"><i /><i /><i /></div>}
+                <div className="workshop-core">
+                  <div className="workshop-core-top" />
+                  <div className="workshop-core-face">
+                    <span className={selectedComponents.some((item) => item.slot === "payload") ? "camera-installed" : ""}>◉</span>
+                  </div>
+                  <div className="workshop-core-side" />
+                  {selectedComponents.some((item) => item.slot === "communication") && <div className="workshop-antenna" />}
+                </div>
+                {selectedComponents.some((item) => item.slot === "solar") && <div className="workshop-wing workshop-wing-right"><i /><i /><i /></div>}
+              </div>
+              <span className="workshop-stage-label">SPACECRAFT CONFIGURATION / CONCEPT ONLY</span>
+            </div>
+          </section>
+
+          <section className="workshop-presets" aria-label="Spacecraft design presets">
+            <div className="workshop-presets-heading">
+              <span className="builder-overline">QUICK START / DESIGN CHALLENGES</span>
+              <strong>Choose your engineering strategy</strong>
+              <p>Each preset makes a different trade-off. Load one, then customize it and watch the mission resources update.</p>
+            </div>
+            <div className="workshop-preset-grid">
+              {spacecraftPresets.map((preset) => (
+                <button
+                  type="button"
+                  className="workshop-preset-card"
+                  key={preset.id}
+                  onClick={() => loadPreset(preset.ids)}
+                >
+                  <span>{preset.focus}</span>
+                  <strong>{preset.name}</strong>
+                  <small>{preset.description}</small>
+                  <em>LOAD DESIGN ↗</em>
+                </button>
+              ))}
+            </div>
+          </section>
 
           <div className="builder-categories">
             {categories.map((category) => (
