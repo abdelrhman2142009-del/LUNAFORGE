@@ -1,5 +1,8 @@
 name: LUNAFORGE CI
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [main, member-5-integration-deliverables]
@@ -36,3 +39,13 @@ jobs:
           if-no-files-found: ignore
       - name: Build production app
         run: npm run build
+      - name: Commit generated npm lockfile on integration branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/member-5-integration-deliverables'
+        run: |
+          git add package-lock.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "build: add reproducible npm lockfile"
+            git push
+          fi
