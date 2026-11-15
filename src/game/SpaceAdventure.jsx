@@ -602,7 +602,7 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
         game.score += 250 + game.challenge.bonus;
         burst(game, ship.x, ship.y, "#8df7ff", 42, 250);
         syncHud(game);
-        setAchievements((current) => [...new Set([...current, "first-rescue", ...(game.score >= 2000 ? ["high-orbit-score"] : []), ...(game.discoveries.length > 0 ? ["curious-pilot"] : [])])]);
+        setAchievements((current) => [...new Set([...current, "first-rescue", ...(game.score >= 2000 ? ["high-orbit-score"] : []), ...(game.discoveries.length > 0 ? ["curious-pilot"] : []), "sentinel-breaker"])]);
         setStatus("won");
         running = false;
       }
@@ -735,7 +735,7 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
         <div className="sa-flight-records"><small>LOCAL FLIGHT RECORDS</small>{flightRecords.length ? flightRecords.map((record, index) => <span key={record.date + "-" + index}><b>#{index + 1} · {record.score.toLocaleString()} PTS</b><i>{record.won ? "RESCUE" : "FLIGHT"} · {record.cores} CORES · {record.seconds}s</i></span>) : <span>Complete a flight to create your first record.</span>}</div>
       </section>
       <div className="sa-instructions">
-        <div><strong>MISSION CONTROL</strong><p>Recover eight data cores, locate the gold relay after core five, and restore its signal. Boost through tight gaps, destroy crystal rocks for bonus points, and collect repair or shield modules.</p></div>
+        <div><strong>MISSION CONTROL</strong><p>Recover the daily core target, disable the orbital sentinel, and restore the gold relay. Your spacecraft engineering affects handling, boost, scanning and pulse systems. Collect discoveries, crystal samples, repair modules and shields.</p></div>
         <div className="sa-key-guide">
           <span>WASD / ARROWS <small>STEER</small></span>
           <span>SPACE <small>PULSE</small></span>
