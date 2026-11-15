@@ -374,6 +374,44 @@ function Builder({ onProceed }) {
             </span>
           </div>
 
+          <section className="workshop-preview" aria-label="Live spacecraft preview">
+            <div className="workshop-preview-copy">
+              <span className="builder-overline">LIVE ASSEMBLY / 3D CONCEPT VIEW</span>
+              <h3>{selectedComponents.length ? "Your spacecraft is taking shape" : "Your spacecraft starts here"}</h3>
+              <p>
+                Install systems from the hangar and watch the spacecraft update.
+                This is a visual game preview, not a manufacturing drawing.
+              </p>
+              <div className="workshop-installed">
+                <span>{selectedComponents.length} / 7 SYSTEMS INSTALLED</span>
+                <div className="workshop-progress"><i style={{ width: `${Math.min(100, selectedComponents.length / 7 * 100)}%` }} /></div>
+                <div className="workshop-tags">
+                  {["structure", "solar", "battery", "payload", "computer", "communication", "adcs", "eps"].map((slot) => (
+                    <span className={selectedComponents.some((item) => item.slot === slot) ? "installed" : ""} key={slot}>
+                      {selectedComponents.some((item) => item.slot === slot) ? "✓ " : "○ "}{slot.toUpperCase()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="workshop-stage">
+              <div className="workshop-orbit-ring" />
+              <div className="workshop-satellite">
+                {selectedComponents.some((item) => item.slot === "solar") && <div className="workshop-wing workshop-wing-left"><i /><i /><i /></div>}
+                <div className="workshop-core">
+                  <div className="workshop-core-top" />
+                  <div className="workshop-core-face">
+                    <span className={selectedComponents.some((item) => item.slot === "payload") ? "camera-installed" : ""}>◉</span>
+                  </div>
+                  <div className="workshop-core-side" />
+                  {selectedComponents.some((item) => item.slot === "communication") && <div className="workshop-antenna" />}
+                </div>
+                {selectedComponents.some((item) => item.slot === "solar") && <div className="workshop-wing workshop-wing-right"><i /><i /><i /></div>}
+              </div>
+              <span className="workshop-stage-label">SPACECRAFT CONFIGURATION / CONCEPT ONLY</span>
+            </div>
+          </section>
+
           <div className="builder-categories">
             {categories.map((category) => (
               <button
