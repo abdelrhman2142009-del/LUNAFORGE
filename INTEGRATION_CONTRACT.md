@@ -11,21 +11,21 @@ This document records the interfaces visible in the current repository. If the t
 | Area | Current path | Primary owner |
 |---|---|---|
 | React app and navigation | `src/App.jsx`, `src/main.jsx` | Member 2 |
-| React screens and UI | `src/components/*` | Member 2; simulation ownership must be agreed with Member 4 |
+| React screens and UI | `src/components/*`, `src/App.jsx` | Member 2 |
 | Research and glossary data | `src/data/*` | Member 1 |
 | Component catalog and calculations | `src/engine/*` | Member 3 |
+| Simulation engine and simulation screen | `src/simulation/*` | Member 4 |
 | Automated tests and integration docs | `tests/*`, `README.md`, this file | Member 5 |
-| Simulation behavior | Currently embedded in `src/components/MissionSimulation.jsx` | Member 4 / Member 2 shared boundary — confirm with team |
 
 ### Observed structure differences
 
-The original planning document proposed `src/simulation/*`, `src/data/missionData.js`, and `tests/*`. In the reviewed main branch:
-- `MissionSimulation.jsx` is currently in `src/components/`, not `src/simulation/`.
+The original main branch placed the React simulation screen in `src/components/MissionSimulation.jsx`. The Member 5 integration branch copies Member 4's simulation module into `src/simulation/*` and routes `src/App.jsx` to the new screen. The older component screen remains in the repository as a legacy/alternate implementation and should be removed only after team review.
 - No `src/data/missionData.js` was found.
-- The component catalog is currently `src/engine/componentsData.js`.
-- An older compatibility test exists at the repository root as `integration.test.js`.
+- The component catalog is `src/engine/componentsData.js`.
+- The existing compatibility test remains at the repository root as `integration.test.js`.
+- New simulation tests are under `tests/simulation.integration.test.js`.
 
-These are observations, not automatic instructions to move files. Agree on ownership and perform any refactor in a dedicated PR.
+The original `simulation` branch is left unchanged; the integration branch contains a snapshot of its module files plus the App adapter changes.
 
 ## 2. Units and naming
 
