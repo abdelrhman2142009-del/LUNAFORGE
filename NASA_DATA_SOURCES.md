@@ -6,7 +6,7 @@ LUNAFORGE also reads NASA's Earth Observatory Natural Event Tracker (EONET) v3 o
 
 LUNAFORGE uses NASA's Global Imagery Browse Services (GIBS) to request real Earth-observation visualizations over the web.
 
-- **Earth globe texture:** NASA GIBS `BlueMarble_NextGeneration` global image, projected onto a shaded sphere-like globe in the interface.
+- **Earth globe texture:** NASA GIBS `BlueMarble_NextGeneration` global image, mapped onto a rotating WebGL sphere mesh with interactive drag rotation, depth, lighting, and atmospheric edge styling.
 - **Nile Delta imagery:** selectable Terra MODIS, Aqua MODIS, and Suomi NPP VIIRS corrected-reflectance true-colour browse layers.
 - **Date controls:** the viewer requests dated imagery and steps backward when a requested date is not available.
 - **NASA Worldview:** the viewer links to Worldview for broader exploration of available NASA layers and dates.
@@ -34,7 +34,7 @@ LUNAFORGE uses NASA's Global Imagery Browse Services (GIBS) to request real Eart
 ## Implementation
 
 - URL construction and layer metadata: `src/data/nasaEarthData.js`
-- Textured globe: `src/components/EarthGlobe.jsx` and `EarthGlobe.css`
+- Interactive WebGL sphere: `src/components/EarthGlobe.jsx` and `EarthGlobe.css` (native WebGL; no extra 3D library dependency)
 - Regional imagery viewer: `src/components/NasaImageryPanel.jsx` and `NasaImageryPanel.css`
 - Live natural-event feed: `src/components/NasaEventsPanel.jsx` and `NasaEventsPanel.css`
 - Automated URL and date tests: `tests/nasa-earth-data.test.js`
