@@ -203,14 +203,7 @@ export default function MissionSimulation({
             <span className="lf-star lf-star-three" /><span className="lf-star lf-star-four" />
             <div className="lf-orbit-ring" />
             <EarthGlobe />
-            <div className="lf-satellite-orbit">
-              <div className="lf-satellite">
-                <span className="lf-sat-panel lf-sat-panel-left" /><span className="lf-sat-body" />
-                <span className="lf-sat-panel lf-sat-panel-right" /><span className="lf-sat-antenna" />
-              </div>
-            </div>
             <div className="lf-scene-label lf-earth-label">EARTH</div>
-            <div className="lf-scene-label lf-satellite-label">CUBESAT</div>
           </div>
           <div className="lf-progress-row">
             <div><span className="lf-muted">MISSION PROGRESS</span><strong>{Math.round(simulation.totalProgress)}%</strong></div>
