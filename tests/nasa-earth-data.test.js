@@ -3,6 +3,7 @@ import {
   buildNileDeltaImageryUrl,
   getNasaObservationDate,
   NASA_EARTH_TEXTURE_URL,
+  NASA_EONET_EVENTS_URL,
   NASA_IMAGERY_LAYERS,
 } from "../src/data/nasaEarthData.js";
 
@@ -21,6 +22,13 @@ describe("NASA Earth imagery configuration", () => {
     expect(url.searchParams.get("LAYERS")).toBe(NASA_IMAGERY_LAYERS[1].id);
     expect(url.searchParams.get("TIME")).toBe("2026-11-12");
     expect(url.searchParams.get("BBOX")).toBe("29,30,33,33");
+  });
+
+  it("points the natural-event panel at NASA EONET v3 open events", () => {
+    const url = new URL(NASA_EONET_EVENTS_URL);
+    expect(url.hostname).toBe("eonet.gsfc.nasa.gov");
+    expect(url.pathname).toBe("/api/v3/events");
+    expect(url.searchParams.get("status")).toBe("open");
   });
 
   it("calculates observation dates deterministically in UTC", () => {
