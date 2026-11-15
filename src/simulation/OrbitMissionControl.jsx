@@ -46,6 +46,7 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
   const targetInView = isWithinGroundFootprint(orbit, target, 7);
   const stationInView = isWithinGroundFootprint(orbit, GROUND_STATION, 12);
   const cameraSelected = engineeringMission?.selectedComponentIds?.some((id) => id === "camera_basic" || id === "camera_advanced");
+  const adcsSelected = engineeringMission?.selectedComponentIds?.some((id) => id === "adcs_basic" || id === "adcs_precise");
   const downlinkMbps = Number(engineeringMission?.metrics?.downlinkRateMbps) || 1;
   const missionComplete = elapsedSeconds >= MISSION_DURATION_SECONDS;
 
@@ -72,8 +73,8 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
   }
 
   function captureTarget() {
-    if (!cameraSelected) {
-      log("Capture blocked: install a camera in the spacecraft builder first.");
+    if (!cameraSelected || !adcsSelected) {
+      log("Capture blocked: the spacecraft needs both a camera and an ADCS unit.");
       return;
     }
     if (!targetInView) {
