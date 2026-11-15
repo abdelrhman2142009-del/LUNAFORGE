@@ -4,6 +4,7 @@ import "./App.css";
 import Builder from "./components/Builder";
 import MissionSimulation from "./simulation/MissionSimulation";
 import { runEngineeringWhatIf } from "./engine/engineAdapter";
+import nileDeltaWatch from "./data/nile_delta_watch.json";
 const features = [
   {
     number: "01",
@@ -250,23 +251,20 @@ function App() {
             </div>
 
             <div className="mission-card-content">
-              <span className="mission-symbol">EO / 01</span>
-              <h2>EARTH OBSERVATION CUBESAT</h2>
+              <span className="mission-symbol">NDW / 01</span>
+              <h2>{nileDeltaWatch.mission.name.toUpperCase()}</h2>
 
               <p>
-                Design a small satellite in Low Earth Orbit
-                capable of collecting Earth observation data.
-                Balance engineering constraints and complete
-                your mission objectives.
+                Design a 6U CubeSat to explore simulated coastal change,
+                Lake Manzala wetlands, and agricultural and urban patterns
+                across Egypt's Nile Delta. Collect, store, and downlink
+                observation data while balancing spacecraft resources.
               </p>
 
               <div className="mission-specs">
-                <div><span>ORBIT TYPE</span><strong>LEO</strong></div>
+                <div><span>ORBIT</span><strong>500 km LEO</strong></div>
+                <div><span>DURATION</span><strong>7 MISSION DAYS</strong></div>
                 <div><span>DIFFICULTY</span><strong>BEGINNER</strong></div>
-                <div>
-                  <span>MISSION TYPE</span>
-                  <strong>EARTH OBSERVATION</strong>
-                </div>
               </div>
             </div>
 
@@ -298,9 +296,8 @@ function App() {
           </h1>
 
           <p className="page-intro">
-            Your objective is to design and operate a CubeSat
-            that collects useful observations of Earth from
-            Low Earth Orbit.
+            {nileDeltaWatch.mission.purpose} This is a seven-day
+            educational scenario using synthetic gameplay data.
           </p>
 
           <div className="briefing-grid">
@@ -330,8 +327,9 @@ function App() {
               <div className="parameter-list">
                 <div><span>Orbit</span><strong>Low Earth Orbit (LEO)</strong></div>
                 <div><span>Target altitude</span><strong>500 km</strong></div>
-                <div><span>Mission duration</span><strong>90 days</strong></div>
-                <div><span>Spacecraft type</span><strong>CubeSat</strong></div>
+                <div><span>Mission duration</span><strong>7 scenario days</strong></div>
+                <div><span>Spacecraft type</span><strong>6U CubeSat</strong></div>
+                <div><span>Observation region</span><strong>Nile Delta, Egypt</strong></div>
               </div>
             </article>
 
@@ -361,7 +359,9 @@ function App() {
                 <li>Stay within the mission budget.</li>
                 <li>Provide enough power for your components.</li>
                 <li>Include a payload for Earth observation.</li>
-                <li>Store and transmit the collected data.</li>
+                <li>Observe at least three priority areas.</li>
+                <li>Store the collected image data.</li>
+                <li>Downlink at least 80% of stored data.</li>
               </ul>
             </article>
             {engineAnalysis && (
@@ -603,6 +603,8 @@ function App() {
       powerMarginPercent: simulationPowerPercent,
       massBudgetPercent: simulationMassBudgetPercent,
     }}
+    engineeringMission={engineAnalysis?.mission}
+    missionConfig={nileDeltaWatch}
     onBack={() => setScreen("analysis")}
   />
 )}
