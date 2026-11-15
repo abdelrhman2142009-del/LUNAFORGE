@@ -1,0 +1,28 @@
+.lfx-feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+.lfx-card { min-width: 0; padding: 17px; border: 1px solid rgba(142,180,220,.16); border-radius: 16px; background: rgba(13,27,44,.92); color: #edf5ff; }
+.lfx-section-kicker { color: #56d8e8; font-size: 10px; font-weight: 800; letter-spacing: .15em; margin-bottom: 7px; }
+.lfx-card h2 { margin: 4px 0 9px; font-size: 18px; }
+.lfx-muted, .lfx-empty { color: #9aacc2; font-size: 12px; line-height: 1.55; }
+.lfx-empty { padding: 12px; border: 1px dashed rgba(142,180,220,.2); border-radius: 10px; }
+.lfx-event-list, .lfx-log-list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
+.lfx-event-list li { padding: 11px; border-radius: 10px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06); }
+.lfx-event-list strong { display: block; margin: 5px 0; font-size: 13px; }
+.lfx-event-list p, .lfx-event-list small { color: #aabbd0; font-size: 11px; line-height: 1.5; }
+.lfx-event-list p { margin: 4px 0; }
+.lfx-severity { display: inline-block; text-transform: uppercase; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.lfx-warning { color: #ffd17a; }.lfx-info { color: #7bd9ee; }
+.lfx-range-label { display: block; margin: 17px 0 8px; color: #c7d8e9; font-size: 12px; }
+.lfx-card input[type="range"] { width: 100%; accent-color: #56d8e8; }
+.lfx-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.lfx-compare-grid div { padding: 11px; border-radius: 10px; background: rgba(255,255,255,.04); }
+.lfx-compare-grid span { display: block; color: #9aacc2; font-size: 10px; margin-bottom: 6px; }
+.lfx-compare-grid strong { font-size: 12px; }
+.lfx-tradeoff { color: #c4d7e9; font-size: 11px; line-height: 1.5; margin: 12px 0; }
+.lfx-action { border: 0; border-radius: 9px; padding: 10px 13px; background: linear-gradient(100deg,#6de0e9,#72b8ff); color: #061521; font-size: 11px; font-weight: 800; cursor: pointer; }
+.lfx-disclaimer, .lfx-footer-note { color: #8297af; font-size: 10px; line-height: 1.6; margin-top: 11px; }
+.lfx-log-list li { display: grid; grid-template-columns: 68px 1fr; gap: 9px; padding-bottom: 9px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.lfx-log-list time { color: #56d8e8; font-size: 10px; }
+.lfx-log-list strong { font-size: 11px; }
+.lfx-log-list p { color: #9aacc2; font-size: 10px; line-height: 1.45; margin: 3px 0 0; }
+.lfx-footer-note { margin: 14px 2px 0; }
+@media (max-width: 760px) { .lfx-feature-grid { grid-template-columns: 1fr; } }
