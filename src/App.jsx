@@ -200,7 +200,7 @@ function App() {
               </div>
 
               <div className="visual-bottom">
-                <span>EARTH OBSERVATION CUBESAT</span>
+                <span>NILE DELTA WATCH / EARTH OBSERVATION</span>
                 <span>MISSION CONCEPT / 001</span>
               </div>
             </div>
@@ -488,8 +488,8 @@ function App() {
                 </div>
 
                 <div>
-                  <span>Power consumption</span>
-                  <strong>{missionReport.totals.power.toFixed(1)} W</strong>
+                  <span>Estimated average spacecraft load</span>
+                  <strong>{(engineAnalysis?.mission?.metrics?.averageLoadW ?? 0).toFixed(1)} W</strong>
                 </div>
 
                 <div>
@@ -507,8 +507,8 @@ function App() {
 
               <div className="parameter-list">
                 <div>
-                  <span>Solar power generation</span>
-                  <strong>{solarPower.toFixed(1)} W</strong>
+                  <span>Estimated average solar generation</span>
+                  <strong>{(engineAnalysis?.mission?.metrics?.averageGenerationW ?? solarPower).toFixed(1)} W</strong>
                 </div>
 
                 <div>
@@ -519,8 +519,8 @@ function App() {
                 <div>
                   <span>Power balance</span>
                   <strong>
-                    {powerBalance > 0 ? "+" : ""}
-                    {powerBalance.toFixed(1)} W
+                    {((engineAnalysis?.mission?.metrics?.powerMarginW ?? powerBalance) > 0) ? "+" : ""}
+                    {(engineAnalysis?.mission?.metrics?.powerMarginW ?? powerBalance).toFixed(1)} W
                   </strong>
                 </div>
 
