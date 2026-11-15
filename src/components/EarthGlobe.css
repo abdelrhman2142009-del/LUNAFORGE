@@ -1,0 +1,81 @@
+.lf-earth-globe-wrap {
+  position: absolute;
+  width: min(58%, 310px);
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lf-earth-globe {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 35% 30%, #5c9fc2 0%, #1a4d76 48%, #071a32 78%);
+  box-shadow:
+    0 0 28px rgba(76, 173, 235, .42),
+    0 0 78px rgba(35, 125, 194, .28),
+    inset -22px -8px 32px rgba(0, 0, 0, .62),
+    inset 8px 4px 20px rgba(193, 232, 255, .15);
+  isolation: isolate;
+}
+
+.lf-earth-globe-texture {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-size: 200% 100%;
+  background-position: 0% center;
+  background-repeat: repeat-x;
+  animation: lf-earth-spin 95s linear infinite;
+  filter: saturate(1.12) contrast(1.06);
+}
+
+.lf-earth-globe-shade {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 31% 27%, rgba(255,255,255,.2), transparent 24%),
+    linear-gradient(90deg, rgba(0,0,0,.02) 35%, rgba(0,0,0,.22) 66%, rgba(0,0,0,.84) 100%);
+  box-shadow: inset -16px -8px 30px rgba(0,0,0,.54);
+}
+
+.lf-earth-globe-atmosphere {
+  position: absolute;
+  inset: -2px;
+  border: 2px solid rgba(132, 213, 255, .55);
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(88, 190, 255, .55), inset 0 0 13px rgba(88, 190, 255, .18);
+}
+
+.lf-earth-globe-caption {
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #9fc9e6;
+  font: 700 8px/1.4 "IBM Plex Mono", monospace;
+  letter-spacing: .16em;
+  white-space: nowrap;
+}
+
+@keyframes lf-earth-spin {
+  from { background-position: 0% center; }
+  to { background-position: 200% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lf-earth-globe-texture { animation: none; }
+}
+
+@media (max-width: 700px) {
+  .lf-earth-globe-wrap { width: min(62%, 260px); }
+}
