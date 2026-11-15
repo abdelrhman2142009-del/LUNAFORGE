@@ -113,17 +113,9 @@ export default function MissionSimulation({
       onStageChange: (stage) => {
         addLog(`Phase: ${stage.title}`, stage.description);
         if (stage.id === "observation") {
-          const ids = engineeringMission?.selectedComponentIds || [];
-          const hasCamera = ids.some((id) => id === "camera_basic" || id === "camera_advanced");
-          const hasAdcs = ids.some((id) => id === "adcs_basic" || id === "adcs_precise");
-          const captured = hasCamera && hasAdcs ? NILE_DELTA_AREAS.map((area) => area.id) : [];
-          observedAreasRef.current = captured;
-          setObservedAreas(captured);
           addLog(
-            "Nile Delta observation pass",
-            captured.length
-              ? "Three synthetic observation areas were recorded: the coast, Lake Manzala wetlands, and agricultural / urban transition."
-              : "No observation scenes were recorded because a camera and ADCS are both required."
+            "Observation phase",
+            "Use the orbital operations panel to wait for a target pass and capture each area manually."
           );
         }
       },
@@ -173,6 +165,13 @@ export default function MissionSimulation({
     resourcesRef.current = initialResourceStatus;
     addLog("Simulation restarted", "The scenario was reset to its initial state.");
     handleStart();
+  }
+
+  function handleOrbitTargetsCaptured(targetIds) {
+    const areaMap = { rosetta: "coastline", damietta: "coastline", manzala: "wetlands", delta: "agriculture" };
+    const areas = [...new Set(targetIds.map((id) => areaMap[id]).filter(Boolean))];
+    observedAreasRef.current = areas;
+    setObservedAreas(areas);
   }
 
   function handleWhatIf(scenario) {
@@ -274,7 +273,7 @@ export default function MissionSimulation({
         </aside>
       </section>
 
-      <OrbitMissionControl engineeringMission={engineeringMission} />
+      <OrbitMissionControl engineeringMission={engineeringMission} onTargetsCaptured={handleOrbitTargetsCaptured} />
 
       <NasaImageryPanel />
 
