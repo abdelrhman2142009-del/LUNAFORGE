@@ -240,13 +240,15 @@ function Builder({ onProceed }) {
 
   // POWER ANALYSIS
 
+  // Use an average-generation gameplay estimate, not panel peak output.
+  // The 72% factor is a simplified allowance for illumination and conversion.
   const solarPower = selectedComponents.reduce(
-    (total, component) =>
-      total + (component.solarPowerOutput || 0),
+    (total, component) => total + (component.solarPowerOutput || 0) * 0.72,
     0
   );
 
-  const powerBalance = solarPower - totals.power;
+  const averagePowerLoad = 12 + totals.power * 0.15;
+  const powerBalance = solarPower - averagePowerLoad;
 
   const powerSufficient =
     hasSolarPanels && powerBalance >= 0;
@@ -270,10 +272,8 @@ function Builder({ onProceed }) {
     { label: "Energy storage battery", complete: hasBattery },
     { label: "Observation payload", complete: hasPayload },
     { label: "Onboard computer", complete: hasComputer },
-    { label: "Attitude control (ADCS)", complete: selectedComponents.some((c) => c.slot === "adcs") },
-    { label: "Electrical power management (EPS)", complete: selectedComponents.some((c) => c.slot === "eps") },
-    { label: "Attitude determination and control (ADCS)", complete: selectedComponents.some((component) => component.slot === "adcs") },
-    { label: "Electrical power management (EPS)", complete: selectedComponents.some((component) => component.slot === "eps") },
+    { label: "Attitude control (ADCS)", complete: hasAdcs },
+    { label: "Electrical power management (EPS)", complete: hasEps },
     { label: "Communication system", complete: hasCommunication },
     { label: "Data storage", complete: hasStorage },
     { label: "Data generation", complete: hasDataGeneration },
