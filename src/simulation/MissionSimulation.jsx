@@ -56,6 +56,7 @@ export default function MissionSimulation({
   const observedAreasRef = useRef([]);
   const [missedContacts, setMissedContacts] = useState(0);
   const [difficulty, setDifficulty] = useState("standard");
+  const [orbitSessionKey, setOrbitSessionKey] = useState(0);
   const missedContactsRef = useRef(0);
   const [logEntries, setLogEntries] = useState([
     makeLogEntry("Mission control ready", "The educational CubeSat scenario is ready to start."),
@@ -155,6 +156,7 @@ export default function MissionSimulation({
     controllerRef.current?.stop();
     controllerRef.current = null;
     setSimulation(INITIAL_SIMULATION_STATE);
+    setOrbitSessionKey((key) => key + 1);
     setEvents([]);
     setMissionOutcome(null);
     setObservedAreas([]);
@@ -266,7 +268,7 @@ export default function MissionSimulation({
         </aside>
       </section>
 
-      <OrbitMissionControl engineeringMission={engineeringMission} onTargetsCaptured={handleOrbitTargetsCaptured} />
+      <OrbitMissionControl key={orbitSessionKey} engineeringMission={engineeringMission} onTargetsCaptured={handleOrbitTargetsCaptured} />
 
       <NasaImageryPanel />
 
