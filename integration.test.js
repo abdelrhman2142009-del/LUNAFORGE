@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateResources, validateMission } from '../src/engine/missionEngine.js';
+import { calculateResources, validateMission } from './src/engine/missionEngine.js';
 
 describe('LUNAFORGE - Integration Test', () => {
   it('calculates total mass, power, and cost correctly', () => {
