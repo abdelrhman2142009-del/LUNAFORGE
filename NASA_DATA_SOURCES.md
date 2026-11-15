@@ -2,6 +2,8 @@
 
 ## What is connected
 
+LUNAFORGE also reads NASA's Earth Observatory Natural Event Tracker (EONET) v3 open-events feed. It displays a small list of NASA-curated event records with category, date, description, and source link. The feed is refreshed on demand and when the panel is mounted.
+
 LUNAFORGE uses NASA's Global Imagery Browse Services (GIBS) to request real Earth-observation visualizations over the web.
 
 - **Earth globe texture:** NASA GIBS `BlueMarble_NextGeneration` global image, projected onto a shaded sphere-like globe in the interface.
@@ -15,7 +17,9 @@ LUNAFORGE uses NASA's Global Imagery Browse Services (GIBS) to request real Eart
 2. NASA GIBS WMS access basics: https://nasa-gibs.github.io/gibs-api-docs/access-basics/
 3. NASA GIBS Python usage — documented Blue Marble and MODIS examples: https://nasa-gibs.github.io/gibs-api-docs/python-usage/
 4. NASA Worldview: https://worldview.earthdata.nasa.gov/
-5. NASA Earth Observatory, *The Nile Delta's Disappearing Farmland* (2021): https://science.nasa.gov/earth/earth-observatory/the-nile-deltas-disappearing-farmland-149183/
+5. NASA Earth Observatory Natural Event Tracker (EONET) v3 API documentation: https://eonet.gsfc.nasa.gov/docs/v3
+6. NASA EONET overview: https://eonet.gsfc.nasa.gov/
+7. NASA Earth Observatory, *The Nile Delta's Disappearing Farmland* (2021): https://science.nasa.gov/earth/earth-observatory/the-nile-deltas-disappearing-farmland-149183/
 
 ## Important scientific distinctions
 
@@ -32,6 +36,7 @@ LUNAFORGE uses NASA's Global Imagery Browse Services (GIBS) to request real Eart
 - URL construction and layer metadata: `src/data/nasaEarthData.js`
 - Textured globe: `src/components/EarthGlobe.jsx` and `EarthGlobe.css`
 - Regional imagery viewer: `src/components/NasaImageryPanel.jsx` and `NasaImageryPanel.css`
+- Live natural-event feed: `src/components/NasaEventsPanel.jsx` and `NasaEventsPanel.css`
 - Automated URL and date tests: `tests/nasa-earth-data.test.js`
 
 No NASA API key is embedded in the frontend. GIBS browse requests are made directly to the documented public imagery endpoint.
