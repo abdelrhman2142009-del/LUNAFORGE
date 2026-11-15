@@ -63,10 +63,7 @@ export default function NasaImageryPanel() {
             src={imageUrl}
             alt={`NASA ${layer.satellite} satellite true-color imagery of the Nile Delta on ${date}`}
             loading="lazy"
-            onError={() => {
-              if (daysBack < 14) setDaysBack((current) => current + 1);
-              else setFailed(true);
-            }}
+            onError={() => setFailed(true)}
           />
         ) : (
           <div className="lf-nasa-image-fallback">
