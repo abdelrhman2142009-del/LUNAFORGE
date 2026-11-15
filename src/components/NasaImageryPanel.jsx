@@ -29,7 +29,7 @@ export default function NasaImageryPanel() {
   }
 
   return (
-    <section className="lf-nasa-panel" aria-labelledby="lf-nasa-heading">
+    <section className="lf-nasa-panel" id="nasa-earth-data" aria-labelledby="lf-nasa-heading">
       <div className="lf-nasa-panel-heading">
         <div>
           <span className="lf-nasa-kicker">LIVE EARTH DATA / NASA GIBS</span>
