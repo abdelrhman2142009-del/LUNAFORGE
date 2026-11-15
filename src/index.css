@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  font-family: 'Manrope', 'Inter', sans-serif;
+  color: #edf4ff;
+  background: #081321;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --bg-main: #081321;
+  --bg-secondary: #0d1b2e;
+  --bg-card: #11243b;
+  --bg-card-hover: #162c46;
+  --bg-light: #f1f6fc;
+
+  --text-main: #edf4ff;
+  --text-muted: #9aacc3;
+  --text-dark: #12243a;
+  --text-dark-muted: #63758c;
+
+  --accent: #35b6e8;
+  --accent-bright: #54d2ff;
+  --accent-dark: #1689c0;
+  --accent-soft: rgba(53, 182, 232, 0.12);
+
+  --success: #4dccaa;
+  --warning: #f3c969;
+  --danger: #f07885;
+
+  --border-dark: rgba(180, 210, 245, 0.13);
+  --border-light: rgba(18, 36, 58, 0.12);
+
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg-main);
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  font-family: 'Manrope', 'Inter', sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+button,
+input,
+textarea,
+select {
+  font-size: inherit;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 4px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  color: #061321;
+  background: var(--accent);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #081321;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #29415e;
+  border: 2px solid #081321;
+  border-radius: 10px;
+}
