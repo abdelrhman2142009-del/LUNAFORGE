@@ -7,6 +7,7 @@ import WhatIfPanel from "./WhatIfPanel.jsx";
 import MissionLog from "./MissionLog.jsx";
 import "./simulation.css";
 import EarthGlobe from "../components/EarthGlobe";
+import NasaImageryPanel from "../components/NasaImageryPanel";
 import "./simulation-enhancements.css";
 
 function makeLogEntry(title, message) {
@@ -261,6 +262,8 @@ export default function MissionSimulation({
           </div>
         </aside>
       </section>
+
+      <NasaImageryPanel />
 
       <section className="lf-timeline-card">
         <div className="lf-timeline-heading">
