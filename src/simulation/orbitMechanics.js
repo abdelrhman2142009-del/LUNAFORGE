@@ -12,7 +12,7 @@ export const DEFAULT_ORBIT = Object.freeze({
 
 const toRadians = (degrees) => (degrees * Math.PI) / 180;
 const toDegrees = (radians) => (radians * 180) / Math.PI;
-const wrapLongitude = (degrees) => ((degrees + 540) % 360) - 180;
+const wrapLongitude = (degrees) => (((degrees % 360) + 540) % 360) - 180;
 
 export function getOrbitPeriodSeconds(altitudeKm = DEFAULT_ORBIT.altitudeKm) {
   const radiusKm = EARTH_RADIUS_KM + altitudeKm;
