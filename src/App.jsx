@@ -8,6 +8,7 @@ import nileDeltaWatch from "./data/nile_delta_watch.json";
 import EarthGlobe from "./components/EarthGlobe";
 import NasaImageryPanel from "./components/NasaImageryPanel";
 import NasaEventsPanel from "./components/NasaEventsPanel";
+import SpaceAdventure from "./game/SpaceAdventure.jsx";
 const features = [
   {
     number: "01",
@@ -112,6 +113,14 @@ function App() {
           </a>
 
           <a
+            href="#"
+            className={screen === "game" ? "active" : ""}
+            onClick={() => setScreen("game")}
+          >
+            Play
+          </a>
+
+          <a
             href="#nasa-earth-data"
             onClick={() => setScreen("home")}
           >
@@ -161,6 +170,9 @@ function App() {
                   START YOUR MISSION <span>→</span>
                 </button>
 
+                <button className="secondary-link sa-home-play" onClick={() => setScreen("game")}>
+                  PLAY ORBIT RUNNER <span>↗</span>
+                </button>
                 <a href="#features" className="secondary-link">
                   EXPLORE PLATFORM ↓
                 </a>
@@ -241,6 +253,9 @@ function App() {
           </section>
         </>
       )}
+
+      {/* PLAYABLE ARCADE GAME */}
+      {screen === "game" && <SpaceAdventure onBack={() => setScreen("home")} />}
 
       {/* MISSION SELECTION */}
 
