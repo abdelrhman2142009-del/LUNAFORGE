@@ -1,311 +1,74 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./SpaceAdventure.css";
 
-const WIDTH = 960;
-const HEIGHT = 540;
-const TARGET_CORES = 12;
-
-function makeGame() {
-  return {
-    ship: { x: WIDTH / 2, y: HEIGHT - 95, vx: 0, vy: 0, invulnerable: 0 },
-    stars: Array.from({ length: 95 }, () => ({ x: Math.random() * WIDTH, y: Math.random() * HEIGHT, size: Math.random() * 2 + 0.4, speed: Math.random() * 35 + 12 })),
-    rocks: [], cores: [], shots: [], particles: [],
-    score: 0, coresCollected: 0, lives: 3, wave: 1,
-    rockTimer: 0, coreTimer: 0, shotTimer: 0, elapsed: 0,
-  };
-}
-
-function drawShip(ctx, ship, time) {
-  ctx.save();
-  ctx.translate(ship.x, ship.y);
-  ctx.shadowBlur = 22;
-  ctx.shadowColor = "#54d9ff";
-  ctx.fillStyle = "#dff8ff";
-  ctx.beginPath();
-  ctx.moveTo(0, -23);
-  ctx.lineTo(17, 17);
-  ctx.lineTo(0, 10);
-  ctx.lineTo(-17, 17);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = "#42bde9";
-  ctx.beginPath();
-  ctx.moveTo(-7, 14);
-  ctx.lineTo(0, 30 + Math.sin(time / 55) * 5);
-  ctx.lineTo(7, 14);
-  ctx.fill();
-  ctx.fillStyle = "#123d68";
-  ctx.beginPath();
-  ctx.arc(0, -5, 5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawScene(ctx, game, time) {
-  const bg = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-  bg.addColorStop(0, "#071326");
-  bg.addColorStop(1, "#0b2440");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-  game.stars.forEach((star) => {
-    ctx.globalAlpha = 0.35 + (star.size / 3) * 0.6;
-    ctx.fillStyle = "#c8edff";
-    ctx.fillRect(star.x, star.y, star.size, star.size);
-  });
-  ctx.globalAlpha = 1;
-
-  ctx.strokeStyle = "rgba(76,174,224,.08)";
-  ctx.lineWidth = 1;
-  for (let x = 0; x < WIDTH; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, HEIGHT); ctx.stroke(); }
-  for (let y = 0; y < HEIGHT; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WIDTH, y); ctx.stroke(); }
-
-  game.cores.forEach((core) => {
-    ctx.save();
-    ctx.translate(core.x, core.y);
-    ctx.rotate(time / 500);
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "#4ce7d1";
-    ctx.fillStyle = "#6dffe0";
-    ctx.beginPath();
-    ctx.moveTo(0, -12); ctx.lineTo(9, 0); ctx.lineTo(0, 12); ctx.lineTo(-9, 0); ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  });
-
-  game.rocks.forEach((rock) => {
-    ctx.save();
-    ctx.translate(rock.x, rock.y);
-    ctx.rotate(rock.rotation);
-    ctx.fillStyle = "#71859d";
-    ctx.strokeStyle = "#a7bdd0";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let i = 0; i < 9; i++) {
-      const a = (i / 9) * Math.PI * 2;
-      const radius = rock.radius * (0.78 + Math.sin(i * 8.2 + rock.seed) * 0.16);
-      const x = Math.cos(a) * radius, y = Math.sin(a) * radius;
-      if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.restore();
-  });
-
-  game.shots.forEach((shot) => {
-    ctx.fillStyle = "#78eaff";
-    ctx.shadowBlur = 14;
-    ctx.shadowColor = "#4edbff";
-    ctx.fillRect(shot.x - 2, shot.y - 9, 4, 16);
-  });
-  ctx.shadowBlur = 0;
-
-  game.particles.forEach((particle) => {
-    ctx.globalAlpha = Math.max(0, particle.life / particle.maxLife);
-    ctx.fillStyle = particle.color;
-    ctx.beginPath(); ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2); ctx.fill();
-  });
-  ctx.globalAlpha = 1;
-
-  if (shipIsVisible(game.ship, time)) drawShip(ctx, game.ship, time);
-  ctx.fillStyle = "rgba(180,215,242,.65)";
-  ctx.font = "700 11px ui-monospace, monospace";
-  ctx.fillText("SECTOR 07  /  NILE DELTA ORBIT", 22, 28);
-  ctx.fillText("COLLECT DATA CORES  •  AVOID ASTEROIDS", WIDTH - 305, 28);
-}
-function shipIsVisible(ship, time) { return ship.invulnerable <= 0 || Math.floor(time / 90) % 2 === 0; }
-function burst(game, x, y, color, amount = 12) {
-  for (let i = 0; i < amount; i++) {
-    const angle = Math.random() * Math.PI * 2, speed = Math.random() * 150 + 35;
-    game.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 0.55 + Math.random() * 0.5, maxLife: 1.05, size: Math.random() * 3 + 1, color });
-  }
-}
-
-export default function SpaceAdventure({ onBack = () => {} }) {
-  const canvasRef = useRef(null);
-  const gameRef = useRef(makeGame());
-  const keysRef = useRef({});
-  const [status, setStatus] = useState("ready");
-  const [hud, setHud] = useState({ score: 0, cores: 0, lives: 3, wave: 1 });
-  const [bestScore, setBestScore] = useState(0);
-
-  useEffect(() => {
-    const savedBest = Number(window.localStorage.getItem("lunaforge-orbit-runner-best") || 0);
-    if (savedBest > 0) setBestScore(savedBest);
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem("lunaforge-orbit-runner-best", String(bestScore));
-  }, [bestScore]);
-
-  function syncHud(game) {
-    setHud({ score: game.score, cores: game.coresCollected, lives: game.lives, wave: game.wave });
-    setBestScore((best) => Math.max(best, game.score));
-  }
-
-  function startGame() {
-    gameRef.current = makeGame();
-    keysRef.current = {};
-    setHud({ score: 0, cores: 0, lives: 3, wave: 1 });
-    setStatus("playing");
-  }
-
-  useEffect(() => {
-    if (status !== "playing") return undefined;
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!ctx) return undefined;
-    let frame = 0;
-    let previous = performance.now();
-    let hudTimer = 0;
-    const game = gameRef.current;
-
-    const tick = (now) => {
-      const dt = Math.min((now - previous) / 1000, 0.035);
-      previous = now;
-      game.elapsed += dt * 1000;
-      const ship = game.ship;
-      const keys = keysRef.current;
-
-      const dx = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0);
-      const dy = (keys.ArrowDown || keys.s ? 1 : 0) - (keys.ArrowUp || keys.w ? 1 : 0);
-      const length = Math.hypot(dx, dy) || 1;
-      ship.x = Math.max(22, Math.min(WIDTH - 22, ship.x + (dx / length) * 290 * dt));
-      ship.y = Math.max(45, Math.min(HEIGHT - 30, ship.y + (dy / length) * 290 * dt));
-      ship.invulnerable = Math.max(0, ship.invulnerable - dt);
-
-      game.stars.forEach((star) => { star.y += star.speed * dt; if (star.y > HEIGHT) { star.y = 0; star.x = Math.random() * WIDTH; } });
-      game.rockTimer += dt;
-      game.coreTimer += dt;
-      game.shotTimer -= dt;
-      const difficulty = 1 + Math.floor(game.coresCollected / 4) * 0.22;
-      if (game.rockTimer > Math.max(0.42, 1.12 - difficulty * 0.13)) {
-        game.rockTimer = 0;
-        const radius = 15 + Math.random() * 18;
-        game.rocks.push({ x: radius + Math.random() * (WIDTH - radius * 2), y: -radius, radius, vx: (Math.random() - 0.5) * 65, vy: (75 + Math.random() * 85) * difficulty, rotation: 0, spin: (Math.random() - 0.5) * 2, seed: Math.random() * 20 });
-      }
-      if (game.coreTimer > 1.65) {
-        game.coreTimer = 0;
-        game.cores.push({ x: 35 + Math.random() * (WIDTH - 70), y: -20, vy: 105 + Math.random() * 35 });
-      }
-      if ((keys[" "] || keys.Space) && game.shotTimer <= 0) {
-        game.shots.push({ x: ship.x, y: ship.y - 24, vy: -470 });
-        game.shotTimer = 0.19;
-      }
-
-      game.shots.forEach((shot) => { shot.y += shot.vy * dt; });
-      game.rocks.forEach((rock) => { rock.x += rock.vx * dt; rock.y += rock.vy * dt; rock.rotation += rock.spin * dt; });
-      game.cores.forEach((core) => { core.y += core.vy * dt; });
-      game.particles.forEach((p) => { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.985; p.vy *= 0.985; p.life -= dt; });
-
-      game.shots = game.shots.filter((shot) => shot.y > -20);
-      game.cores = game.cores.filter((core) => core.y < HEIGHT + 25);
-      game.rocks = game.rocks.filter((rock) => rock.y < HEIGHT + rock.radius + 10);
-      game.particles = game.particles.filter((p) => p.life > 0);
-
-      for (let i = game.rocks.length - 1; i >= 0; i--) {
-        const rock = game.rocks[i];
-        const shotIndex = game.shots.findIndex((shot) => Math.hypot(shot.x - rock.x, shot.y - rock.y) < rock.radius + 5);
-        if (shotIndex >= 0) {
-          game.shots.splice(shotIndex, 1);
-          game.rocks.splice(i, 1);
-          game.score += 50;
-          burst(game, rock.x, rock.y, "#ffb66e", 13);
-          continue;
-        }
-        if (ship.invulnerable <= 0 && Math.hypot(ship.x - rock.x, ship.y - rock.y) < rock.radius + 13) {
-          game.rocks.splice(i, 1);
-          game.lives -= 1;
-          ship.invulnerable = 1.6;
-          burst(game, ship.x, ship.y, "#ff718a", 22);
-          if (game.lives <= 0) { syncHud(game); setStatus("lost"); }
-        }
-      }
-      for (let i = game.cores.length - 1; i >= 0; i--) {
-        const core = game.cores[i];
-        if (Math.hypot(ship.x - core.x, ship.y - core.y) < 28) {
-          game.cores.splice(i, 1);
-          game.coresCollected += 1;
-          game.score += 100;
-          game.wave = 1 + Math.floor(game.coresCollected / 4);
-          burst(game, core.x, core.y, "#5dffe1", 16);
-          if (game.coresCollected >= TARGET_CORES) { syncHud(game); setStatus("won"); }
-        }
-      }
-
-      drawScene(ctx, game, now);
-      hudTimer += dt;
-      if (hudTimer > 0.12) { hudTimer = 0; syncHud(game); }
-      if (statusRef.current === "playing") frame = requestAnimationFrame(tick);
-    };
-    const statusRef = { current: status };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [status]);
-
-  useEffect(() => {
-    const down = (event) => {
-      const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "Space", "w", "a", "s", "d"];
-      if (keys.includes(event.key)) event.preventDefault();
-      keysRef.current[event.key] = true;
-      if (event.key === "Escape" && status === "playing") setStatus("paused");
-      else if (event.key === "Escape" && status === "paused") setStatus("playing");
-    };
-    const up = (event) => { keysRef.current[event.key] = false; };
-    window.addEventListener("keydown", down);
-    window.addEventListener("keyup", up);
-    return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
-  }, [status]);
-
-  function hold(key, pressed) { keysRef.current[key] = pressed; }
-
-  const overlayTitle = status === "ready" ? "YOUR SHIP. YOUR SURVIVAL." : status === "paused" ? "GAME PAUSED" : status === "won" ? "SECTOR CLEARED!" : "SHIP LOST";
-  const overlayText = status === "ready"
-    ? "Pilot through the asteroid field, blast rocks, and recover 12 lost data cores."
-    : status === "paused" ? "Take a breath, commander. Your run is safe."
-    : status === "won" ? "All 12 data cores recovered. The Nile Delta expedition is complete."
-    : "Your ship ran out of hull integrity. Launch another run and beat your high score.";
-
-  return (
-    <main className="space-adventure">
-      <div className="sa-topbar">
-        <button className="sa-back" onClick={onBack}>← BACK TO LUNAFORGE</button>
-        <span className="sa-live"><i /> ARCADE MODE / SECTOR 07</span>
-      </div>
-      <header className="sa-heading">
-        <div><p className="sa-kicker">LUNAFORGE ORIGINAL ARCADE</p><h1>ORBIT <span>RUNNER</span></h1><p>One pilot. One satellite. A whole field of trouble.</p></div>
-        <div className="sa-best"><small>PERSONAL BEST</small><strong>{bestScore.toLocaleString()}</strong></div>
-      </header>
-      <section className="sa-game-shell">
-        <div className="sa-hud">
-          <div><small>SCORE</small><strong>{hud.score.toLocaleString()}</strong></div>
-          <div><small>DATA CORES</small><strong>{hud.cores} <em>/ {TARGET_CORES}</em></strong></div>
-          <div><small>HULL</small><strong className="sa-lives">{"◆ ".repeat(hud.lives)}<span>{"◇ ".repeat(3 - hud.lives)}</span></strong></div>
-          <div><small>WAVE</small><strong>{String(hud.wave).padStart(2, "0")}</strong></div>
-        </div>
-        <div className="sa-canvas-wrap">
-          <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} aria-label="Orbit Runner arcade game" />
-          {status !== "playing" && <div className="sa-overlay">
-            <span>{status === "won" ? "MISSION COMPLETE" : status === "lost" ? "MISSION FAILED" : status === "paused" ? "PAUSED" : "READY FOR LAUNCH"}</span>
-            <h2>{overlayTitle}</h2><p>{overlayText}</p>
-            <button onClick={status === "ready" || status === "won" || status === "lost" ? startGame : () => setStatus("playing")}>{status === "ready" ? "▶ START GAME" : status === "paused" ? "▶ RESUME" : "↻ PLAY AGAIN"}</button>
-          </div>}
-        </div>
-        <div className="sa-game-footer"><span>RECOVER 12 DATA CORES TO CLEAR THE SECTOR</span><button onClick={() => setStatus(status === "playing" ? "paused" : status === "paused" ? "playing" : status)} disabled={status !== "playing" && status !== "paused"}>{status === "playing" ? "Ⅱ PAUSE" : "▶ RESUME"}</button></div>
-      </section>
-      <div className="sa-instructions">
-        <div><strong>HOW TO PLAY</strong><p>Move through space, collect glowing cores, and shoot asteroids before they hit you.</p></div>
-        <div className="sa-key-guide"><span>↑ ↓ ← → / WASD <small>MOVE</small></span><span>SPACE <small>FIRE</small></span><span>ESC <small>PAUSE</small></span></div>
-      </div>
-      <div className="sa-mobile-controls">
-        <div className="sa-dpad">
-          <button onPointerDown={() => hold("ArrowUp", true)} onPointerUp={() => hold("ArrowUp", false)} onPointerLeave={() => hold("ArrowUp", false)}>↑</button>
-          <button onPointerDown={() => hold("ArrowLeft", true)} onPointerUp={() => hold("ArrowLeft", false)} onPointerLeave={() => hold("ArrowLeft", false)}>←</button>
-          <button onPointerDown={() => hold("ArrowDown", true)} onPointerUp={() => hold("ArrowDown", false)} onPointerLeave={() => hold("ArrowDown", false)}>↓</button>
-          <button onPointerDown={() => hold("ArrowRight", true)} onPointerUp={() => hold("ArrowRight", false)} onPointerLeave={() => hold("ArrowRight", false)}>→</button>
-        </div>
-        <button className="sa-fire" onPointerDown={() => hold(" ", true)} onPointerUp={() => hold(" ", false)} onPointerLeave={() => hold(" ", false)}>FIRE</button>
-      </div>
-      <p className="sa-disclaimer">Arcade gameplay is an original fictional mini-game inside the LUNAFORGE universe.</p>
-    </main>
-  );
+const W = 960, H = 540, SAVE_KEY = "lunaforge-campaign-save-v1";
+const WORLDS = [
+  { name: "ASTEROID BELT", subtitle: "Debris fields and unstable rocks", color: "#64d8ee", sky: ["#071326", "#17334b"], hazard: "Asteroids", story: "A damaged relay has gone silent. Recover its data cores and chart a safe route through the belt." },
+  { name: "MARS FRONTIER", subtitle: "Red dust, solar storms, old colonies", color: "#ff9b75", sky: ["#1a1020", "#542b35"], hazard: "Storm fragments", story: "A frontier outpost is losing power. Secure the route and retrieve its emergency navigation beacon." },
+  { name: "FROZEN MOON", subtitle: "Ice shards and drifting crystal fields", color: "#9bdcff", sky: ["#071a2c", "#1b4964"], hazard: "Ice shards", story: "A research station beneath the ice has sent one final signal. Find the encrypted archive." },
+  { name: "DEEP SPACE", subtitle: "Unknown signals beyond mapped space", color: "#c5a4ff", sky: ["#100b25", "#30204e"], hazard: "Void sentinels", story: "The signal source is awake. Reach the anomaly and protect the last explorer convoy." },
+];
+const SHIPS = [
+  { id: "scout", name: "SCOUT", cost: 0, speed: 1, fire: 1, armor: 1, desc: "Balanced starter craft" },
+  { id: "comet", name: "COMET", cost: 350, speed: 1.25, fire: 1, armor: 1, desc: "Fast and agile" },
+  { id: "bulwark", name: "BULWARK", cost: 550, speed: .9, fire: 1, armor: 2, desc: "Extra hull protection" },
+  { id: "nova", name: "NOVA", cost: 850, speed: 1.08, fire: 1.7, armor: 1, desc: "Rapid energy cannon" },
+];
+const defaultSave = { credits: 0, best: 0, unlocked: 1, selected: "scout", owned: ["scout"], upgrades: { speed: 0, weapon: 0, shield: 0 }, achievements: [], completed: [], totalRuns: 0 };
+const loadSave = () => { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); return s ? { ...defaultSave, ...s, upgrades: { ...defaultSave.upgrades, ...(s.upgrades || {}) } } : defaultSave; } catch { return defaultSave; } };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const makeRun = (level, save) => ({ ship: { x: W / 2, y: H - 90, inv: 0 }, stars: Array.from({ length: 100 }, () => ({ x: Math.random()*W, y: Math.random()*H, z: Math.random()*2+0.4 })), rocks: [], cores: [], shots: [], enemyShots: [], particles: [], powerups: [], score: 0, cores: 0, lives: Math.min(5, 3 + save.upgrades.shield), wave: 1, combo: 0, comboTimer: 0, boss: null, bossShots: 0, time: 0, spawn: 0, coreSpawn: 0, shot: 0, powerSpawn: 13, level, done: false, earned: 0 });
+function burst(g,x,y,color,n=16){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=35+Math.random()*190;g.particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.45+Math.random()*.6,max:.9,size:1+Math.random()*3,color});}}
+function drawShip(c,s,t,ship){c.save();c.translate(s.x,s.y);c.shadowBlur=22;c.shadowColor="#5de6ff";c.fillStyle=ship.id==="nova"?"#e7d5ff":"#e6faff";c.beginPath();c.moveTo(0,-25);c.lineTo(19,17);c.lineTo(0,10);c.lineTo(-19,17);c.closePath();c.fill();c.fillStyle="#42bde9";c.beginPath();c.moveTo(-7,15);c.lineTo(0,30+Math.sin(t/45)*5);c.lineTo(7,15);c.fill();c.fillStyle="#164a72";c.beginPath();c.arc(0,-5,5,0,Math.PI*2);c.fill();c.restore();}
+function drawGame(c,g,world,shipDef,t){const grad=c.createLinearGradient(0,0,0,H);grad.addColorStop(0,world.sky[0]);grad.addColorStop(1,world.sky[1]);c.fillStyle=grad;c.fillRect(0,0,W,H);g.stars.forEach(s=>{c.globalAlpha=.35+s.z*.25;c.fillStyle="#e3f5ff";c.fillRect(s.x,s.y,s.z,s.z)});c.globalAlpha=1;
+g.cores.forEach(o=>{c.save();c.translate(o.x,o.y);c.rotate(t/450);c.shadowBlur=20;c.shadowColor="#55ffe0";c.fillStyle="#73ffe1";c.beginPath();c.moveTo(0,-12);c.lineTo(9,0);c.lineTo(0,12);c.lineTo(-9,0);c.fill();c.restore()});
+g.rocks.forEach(r=>{c.save();c.translate(r.x,r.y);c.rotate(r.rot);c.fillStyle=r.kind==="ice"?"#8bd9ef":"#75869b";c.strokeStyle="#c1e8f5";c.lineWidth=2;c.beginPath();for(let i=0;i<9;i++){const a=i*Math.PI*2/9,rad=r.r*(.78+Math.sin(i*8+r.seed)*.16);i?c.lineTo(Math.cos(a)*rad,Math.sin(a)*rad):c.moveTo(Math.cos(a)*rad,Math.sin(a)*rad)}c.closePath();c.fill();c.stroke();c.restore()});
+g.shots.forEach(o=>{c.fillStyle="#7ceaff";c.shadowBlur=12;c.shadowColor="#5ceaff";c.fillRect(o.x-2,o.y-10,4,18)});c.shadowBlur=0;
+g.enemyShots.forEach(o=>{c.fillStyle="#ff7898";c.beginPath();c.arc(o.x,o.y,5,0,7);c.fill()});
+g.powerups.forEach(o=>{c.save();c.translate(o.x,o.y);c.shadowBlur=18;c.shadowColor="#f4d66b";c.fillStyle="#ffe68a";c.fillRect(-9,-9,18,18);c.fillStyle="#4b3910";c.font="bold 12px sans-serif";c.fillText(o.type==="shield"?"S":o.type==="rapid"?"R":"+",-4,4);c.restore()});
+if(g.boss){c.save();c.translate(g.boss.x,g.boss.y);c.shadowBlur=30;c.shadowColor="#ff668d";c.fillStyle="#6b284c";c.strokeStyle="#ff9db8";c.lineWidth=4;c.beginPath();c.moveTo(-65,-30);c.lineTo(-28,-52);c.lineTo(0,-38);c.lineTo(28,-52);c.lineTo(65,-30);c.lineTo(55,30);c.lineTo(0,48);c.lineTo(-55,30);c.closePath();c.fill();c.stroke();c.fillStyle="#ffb7ca";c.beginPath();c.arc(0,-3,13,0,7);c.fill();c.restore();c.fillStyle="#42253b";c.fillRect(W/2-130,25,260,10);c.fillStyle="#ff668d";c.fillRect(W/2-130,25,260*clamp(g.boss.hp/g.boss.max,0,1),10);c.fillStyle="#fff";c.font="bold 11px monospace";c.fillText("GUARDIAN CORE",W/2-48,18)}
+g.particles.forEach(p=>{c.globalAlpha=clamp(p.life/p.max,0,1);c.fillStyle=p.color;c.beginPath();c.arc(p.x,p.y,p.size,0,7);c.fill()});c.globalAlpha=1;if(g.ship.inv<=0||Math.floor(t/90)%2===0)drawShip(c,g.ship,t,shipDef);
+c.fillStyle="rgba(220,240,255,.7)";c.font="bold 11px monospace";c.fillText(world.name+" / SECTOR "+String(g.level).padStart(2,"0"),20,25);}
+export default function SpaceAdventure({ onBack=()=>{}, onEngineering=()=>{} }){
+ const canvas=useRef(null), game=useRef(null), keys=useRef({}), [save,setSave]=useState(loadSave), [screen,setScreen]=useState("hangar"), [level,setLevel]=useState(1), [hud,setHud]=useState({score:0,cores:0,lives:3,combo:0}), [result,setResult]=useState(null), [notice,setNotice]=useState("");
+ const persist=useCallback(next=>{setSave(next);try{localStorage.setItem(SAVE_KEY,JSON.stringify(next))}catch{}},[]);
+ const shipDef=SHIPS.find(s=>s.id===save.selected)||SHIPS[0], world=WORLDS[Math.min(3,Math.floor((level-1)/3))], bossLevel=level%3===0;
+ const reward=useCallback((g,won)=>{const earned=won?Math.round(100+g.score*.22+g.lives*35):Math.round(g.score*.08);const completed=[...new Set(won?[...save.completed,level]:save.completed)];const achievements=[...save.achievements];const add=(id)=>{if(!achievements.includes(id))achievements.push(id)};if(won&&level===1)add("first-flight");if(won&&level>=12)add("deep-space");if(g.score>=1200)add("ace-pilot");if(g.combo>=8)add("combo-master");if(g.lives>=4&&won)add("untouchable");if(g.cores>=8)add("collector");const unlocked=Math.max(save.unlocked,won?Math.min(12,level+1):save.unlocked);const next={...save,credits:save.credits+earned,best:Math.max(save.best,g.score),unlocked,completed,achievements,totalRuns:save.totalRuns+1};persist(next);setResult({won,earned,score:g.score,achievements:achievements.filter(x=>!save.achievements.includes(x))});setScreen("result")},[level,persist,save]);
+ const start=useCallback((n)=>{setLevel(n);game.current=makeRun(n,save);keys.current={};setHud({score:0,cores:0,lives:Math.min(5,3+save.upgrades.shield),combo:0});setResult(null);setScreen("playing")},[save]);
+ useEffect(()=>{if(screen!=="playing")return;const c=canvas.current,ctx=c?.getContext("2d");if(!ctx)return;let raf,last=performance.now(),hudTime=0;const g=game.current;const ship=SHIPS.find(s=>s.id===save.selected)||SHIPS[0];const tick=now=>{const dt=Math.min((now-last)/1000,.032);last=now;g.time+=dt;const p=g.ship,k=keys.current,dx=(k.ArrowRight||k.d?1:0)-(k.ArrowLeft||k.a?1:0),dy=(k.ArrowDown||k.s?1:0)-(k.ArrowUp||k.w?1:0),len=Math.hypot(dx,dy)||1;p.x=clamp(p.x+dx/len*290*ship.speed*(1+save.upgrades.speed*.12)*dt,22,W-22);p.y=clamp(p.y+dy/len*290*ship.speed*(1+save.upgrades.speed*.12)*dt,45,H-28);p.inv=Math.max(0,p.inv-dt);g.stars.forEach(s=>{s.y+=s.z*42*dt;if(s.y>H){s.y=0;s.x=Math.random()*W}});g.spawn+=dt;g.coreSpawn+=dt;g.shot-=dt;g.comboTimer-=dt;if(g.comboTimer<=0)g.combo=0;
+ const target=5+Math.min(5,level);if(!g.boss&&g.cores<target&&g.spawn>Math.max(.38,1.05-level*.025)){g.spawn=0;const r=14+Math.random()*16;g.rocks.push({x:r+Math.random()*(W-r*2),y:-r,r,vx:(Math.random()-.5)*80,vy:(90+Math.random()*75)*(1+level*.045),rot:0,spin:(Math.random()-.5)*2,seed:Math.random()*20,kind:world.name==="FROZEN MOON"?"ice":"rock"})}
+ if(g.coreSpawn>1.6&&g.cores<target){g.coreSpawn=0;g.cores.push({x:35+Math.random()*(W-70),y:-18,vy:100+Math.random()*35})}
+ if((k[" "]||k.Space||k.fire)&&g.shot<=0){g.shots.push({x:p.x,y:p.y-22,vy:-490});g.shot=.2/(ship.fire*(1+save.upgrades.weapon*.18))}
+ if(bossLevel&&g.cores>=target&&!g.boss){g.boss={x:W/2,y:105,hp:18+level*3,max:18+level*3,dir:1};g.rocks=[]}
+ if(g.boss){g.boss.x+=g.boss.dir*115*dt;if(g.boss.x>W-100||g.boss.x<100)g.boss.dir*=-1;g.bossShots+=dt;if(g.bossShots>1.05){g.bossShots=0;g.enemyShots.push({x:g.boss.x,y:g.boss.y+35,vy:205+level*5})}}
+ g.shots.forEach(o=>o.y+=o.vy*dt);g.rocks.forEach(o=>{o.x+=o.vx*dt;o.y+=o.vy*dt;o.rot+=o.spin*dt});g.cores.forEach(o=>o.y+=o.vy*dt);g.enemyShots.forEach(o=>o.y+=o.vy*dt);g.powerups.forEach(o=>o.y+=o.vy*dt);g.particles.forEach(o=>{o.x+=o.vx*dt;o.y+=o.vy*dt;o.life-=dt;o.vx*=.985;o.vy*=.985});
+ g.shots=g.shots.filter(o=>o.y>-20);g.rocks=g.rocks.filter(o=>o.y<H+40);g.cores=g.cores.filter(o=>o.y<H+30);g.enemyShots=g.enemyShots.filter(o=>o.y<H+20);g.powerups=g.powerups.filter(o=>o.y<H+20);g.particles=g.particles.filter(o=>o.life>0);
+ for(let i=g.rocks.length-1;i>=0;i--){const r=g.rocks[i],si=g.shots.findIndex(s=>Math.hypot(s.x-r.x,s.y-r.y)<r.r+6);if(si>=0){g.shots.splice(si,1);g.rocks.splice(i,1);g.score+=50;g.combo++;g.comboTimer=2.3;burst(g,r.x,r.y,"#ffb66e",12);continue}if(p.inv<=0&&Math.hypot(p.x-r.x,p.y-r.y)<r.r+14){g.rocks.splice(i,1);g.lives--;p.inv=1.5;burst(g,p.x,p.y,"#ff718a",20);if(g.lives<=0){drawGame(ctx,g,world,ship,now);reward(g,false);return}}}
+ for(let i=g.shots.length-1;i>=0;i--){if(g.boss&&Math.hypot(g.shots[i].x-g.boss.x,g.shots[i].y-g.boss.y)<65){g.shots.splice(i,1);g.boss.hp-=1;g.score+=15;burst(g,g.boss.x+(Math.random()-.5)*65,g.boss.y,"#ff8bb0",3);if(g.boss.hp<=0){g.score+=500;burst(g,g.boss.x,g.boss.y,"#ff8bb0",45);g.boss=null;g.coresCollected=true;reward(g,true);return}}}
+ for(let i=g.cores.length-1;i>=0;i--){const o=g.cores[i];if(Math.hypot(p.x-o.x,p.y-o.y)<28){g.cores.splice(i,1);g.cores++;g.score+=100+Math.min(100,g.combo*5);g.combo++;g.comboTimer=2.8;burst(g,o.x,o.y,"#5dffe1",14);if(g.cores>=target&&!bossLevel){reward(g,true);return}}}
+ if(g.powerSpawn<g.time&&g.powerups.length<1){g.powerSpawn=g.time+18;g.powerups.push({x:50+Math.random()*(W-100),y:-20,vy:95,type:["shield","rapid","repair"][Math.floor(Math.random()*3)]})}
+ for(let i=g.powerups.length-1;i>=0;i--){const o=g.powerups[i];if(Math.hypot(p.x-o.x,p.y-o.y)<30){g.powerups.splice(i,1);if(o.type==="repair")g.lives=Math.min(5,g.lives+1);else if(o.type==="shield")p.inv=3;else g.shot=-3;g.score+=75;burst(g,o.x,o.y,"#ffe58a",18)}}
+ for(let i=g.enemyShots.length-1;i>=0;i--){const o=g.enemyShots[i];if(Math.hypot(p.x-o.x,p.y-o.y)<20&&p.inv<=0){g.enemyShots.splice(i,1);g.lives--;p.inv=1.4;burst(g,p.x,p.y,"#ff718a",20);if(g.lives<=0){drawGame(ctx,g,world,ship,now);reward(g,false);return}}}
+ drawGame(ctx,g,world,ship,now);hudTime+=dt;if(hudTime>.1){hudTime=0;setHud({score:g.score,cores:g.cores,lives:g.lives,combo:g.combo})}raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf)},[screen,save,level,world,bossLevel,reward]);
+ useEffect(()=>{const down=e=>{if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault();keys.current[e.key]=true;if(e.key==="Escape"&&screen==="playing")setScreen("paused");else if(e.key==="Escape"&&screen==="paused")setScreen("playing")};const up=e=>{keys.current[e.key]=false};window.addEventListener("keydown",down);window.addEventListener("keyup",up);return()=>{window.removeEventListener("keydown",down);window.removeEventListener("keyup",up)}},[screen]);
+ const buyShip=id=>{const s=SHIPS.find(x=>x.id===id);if(!s||save.owned.includes(id)||save.credits<s.cost)return;persist({...save,credits:save.credits-s.cost,owned:[...save.owned,id],selected:id});setNotice(s.name+" UNLOCKED")};
+ const upgrade=(key,cost)=>{if(save.credits<cost||save.upgrades[key]>=3)return;persist({...save,credits:save.credits-cost,upgrades:{...save.upgrades,[key]:save.upgrades[key]+1}});setNotice("UPGRADE INSTALLED")};
+ const achievements=[["first-flight","First Flight","Complete your first sector"],["ace-pilot","Ace Pilot","Score 1,200 points in a run"],["combo-master","Combo Master","Reach an 8-hit combo"],["untouchable","Untouchable","Finish a sector with 4+ hull"],["collector","Data Hunter","Collect 8 cores in a run"],["deep-space","Beyond the Map","Clear the final sector"]];
+ const missions=Array.from({length:12},(_,i)=>({id:i+1,world:WORLDS[Math.floor(i/3)],boss:(i+1)%3===0,done:save.completed.includes(i+1),open:i+1<=save.unlocked}));
+ const buyUpgrade=(key)=>upgrade(key,250+save.upgrades[key]*250);
+ const story=world.story;
+ return <main className="space-adventure">
+  <div className="sa-topbar"><button className="sa-back" onClick={onBack}>← BACK TO LUNAFORGE</button><span className="sa-live"><i/> COMMAND CENTER / PILOT PROFILE</span></div>
+  <header className="sa-heading"><div><p className="sa-kicker">LUNAFORGE CAMPAIGN / FLIGHT OPERATIONS</p><h1>ORBIT <span>RUNNER</span></h1><p>Explore the frontier. Upgrade your ship. Become the legend.</p></div><div className="sa-best"><small>COMMANDER CREDITS</small><strong>{save.credits.toLocaleString()} CR</strong><small>PERSONAL BEST · {save.best.toLocaleString()}</small></div></header>
+  {notice&&<div className="sa-notice" onClick={()=>setNotice("")}>{notice} · DISMISS</div>}
+  {screen==="hangar"&&<><div className="sa-tabs"><button className="active">HANGAR</button><button onClick={()=>setScreen("campaign")}>CAMPAIGN</button><button onClick={()=>setScreen("achievements")}>ACHIEVEMENTS</button></div>
+   <section className="sa-hangar-grid"><article className="sa-panel sa-ship-preview"><span className="sa-kicker">ACTIVE SPACECRAFT</span><div className="sa-ship-art">✦</div><h2>{shipDef.name}</h2><p>{shipDef.desc}</p><div className="sa-stat"><span>VELOCITY</span><b>{Math.round(shipDef.speed*100)}%</b></div><div className="sa-stat"><span>WEAPON OUTPUT</span><b>{Math.round(shipDef.fire*100)}%</b></div><div className="sa-stat"><span>HULL BONUS</span><b>+{(shipDef.armor-1)*1+save.upgrades.shield}</b></div><button className="sa-primary" onClick={()=>setScreen("campaign")}>SELECT MISSION →</button></article>
+   <article className="sa-panel"><span className="sa-kicker">SHIPYARD / FLEET</span><h2>Choose your craft</h2><div className="sa-ship-list">{SHIPS.map(s=><div className={"sa-ship-row "+(save.selected===s.id?"selected":"")} key={s.id}><div><b>{s.name}</b><small>{s.desc}</small></div>{save.owned.includes(s.id)?<button onClick={()=>persist({...save,selected:s.id})}>{save.selected===s.id?"EQUIPPED":"EQUIP"}</button>:<button disabled={save.credits<s.cost} onClick={()=>buyShip(s.id)}>{s.cost} CR</button>}</div>)}</div><span className="sa-kicker sa-upgrade-title">ENGINEERING BAY / UPGRADES</span>{[["speed","Engine", "Move faster"],["weapon","Pulse cannon","Fire faster"],["shield","Hull plating","Start with extra hull"]].map(([key,name,desc])=><div className="sa-upgrade-row" key={key}><div><b>{name} · LV {save.upgrades[key]}/3</b><small>{desc}</small><div className="sa-levels">{[1,2,3].map(n=><i className={save.upgrades[key]>=n?"filled":""} key={n}/>)}</div></div><button disabled={save.upgrades[key]>=3||save.credits<250+save.upgrades[key]*250} onClick={()=>buyUpgrade(key)}>{save.upgrades[key]>=3?"MAX":250+save.upgrades[key]*250+" CR"}</button></div>)}</article></section>
+   <section className="sa-story-strip"><span className="sa-kicker">MISSION INTELLIGENCE</span><h2>{world.name}</h2><p>{story}</p><button className="sa-primary" onClick={()=>setScreen("campaign")}>VIEW CAMPAIGN →</button></section></>}
+  {screen==="campaign"&&<><div className="sa-tabs"><button onClick={()=>setScreen("hangar")}>HANGAR</button><button className="active">CAMPAIGN</button><button onClick={()=>setScreen("achievements")}>ACHIEVEMENTS</button></div><div className="sa-campaign-intro"><span className="sa-kicker">THE FOUR FRONTIERS / 12 SECTORS</span><h2>THE LAST SIGNAL</h2><p>A chain of lost transmissions points toward an unknown presence. Clear each sector, recover the data, and uncover the source.</p></div>{WORLDS.map((w,wi)=><section className="sa-world" key={w.name}><div className="sa-world-head"><div><span className="sa-kicker">WORLD 0{wi+1}</span><h3>{w.name}</h3><p>{w.subtitle}</p></div><span>{save.completed.filter(n=>Math.floor((n-1)/3)===wi).length}/3 CLEARED</span></div><div className="sa-levels-grid">{missions.filter(m=>m.world===w).map(m=><article className={"sa-level-card "+(m.done?"done":!m.open?"locked":"")} key={m.id}><span>SECTOR {String(m.id).padStart(2,"0")}</span><b>{m.boss?"GUARDIAN BATTLE":"FLIGHT OPERATION"}</b><small>{m.done?"COMPLETED":m.open?"AVAILABLE":"LOCKED"}</small><button disabled={!m.open} onClick={()=>start(m.id)}>{m.done?"REPLAY":m.open?"LAUNCH →":"🔒"}</button></article>)}</div></section>)}</>}
+  {screen==="achievements"&&<><div className="sa-tabs"><button onClick={()=>setScreen("hangar")}>HANGAR</button><button onClick={()=>setScreen("campaign")}>CAMPAIGN</button><button className="active">ACHIEVEMENTS</button></div><div className="sa-campaign-intro"><span className="sa-kicker">PILOT RECORD</span><h2>HALL OF LEGENDS</h2><p>{save.achievements.length} / {achievements.length} achievements unlocked · {save.totalRuns} total sorties</p></div><div className="sa-achievements">{achievements.map(([id,name,desc])=><article className={save.achievements.includes(id)?"earned":""} key={id}><span>{save.achievements.includes(id)?"✦":"◇"}</span><div><b>{name}</b><small>{desc}</small></div><strong>{save.achievements.includes(id)?"UNLOCKED":"CLASSIFIED"}</strong></article>)}</div></>}
+  {screen==="playing"||screen==="paused"?<section className="sa-game-shell"><div className="sa-hud"><div><small>SCORE</small><strong>{hud.score.toLocaleString()}</strong></div><div><small>DATA CORES</small><strong>{hud.cores} <em>/ {5+level}</em></strong></div><div><small>HULL</small><strong className="sa-lives">{"◆ ".repeat(hud.lives)}</strong></div><div><small>COMBO</small><strong>×{hud.combo}</strong></div><button onClick={()=>setScreen(screen==="playing"?"paused":"playing")}>{screen==="playing"?"Ⅱ PAUSE":"▶ RESUME"}</button></div><div className="sa-canvas-wrap"><canvas ref={canvas} width={W} height={H}/>{screen==="paused"&&<div className="sa-overlay"><span>FLIGHT PAUSED</span><h2>TAKE A BREATHER</h2><button onClick={()=>setScreen("playing")}>RESUME FLIGHT</button><button className="sa-secondary" onClick={()=>setScreen("campaign")}>ABORT TO CAMPAIGN</button></div>}</div><div className="sa-game-footer"><span>{world.name} · {bossLevel?"GUARDIAN SECTOR":"RECOVER DATA CORES"} · WASD / ARROWS TO MOVE · SPACE TO FIRE</span><button onClick={()=>setScreen("paused")}>Ⅱ PAUSE</button></div><div className="sa-mobile-controls"><div className="sa-dpad">{["ArrowUp","ArrowLeft","ArrowDown","ArrowRight"].map((k,i)=><button key={k} className={"d"+i} onPointerDown={()=>keys.current[k]=true} onPointerUp={()=>keys.current[k]=false} onPointerLeave={()=>keys.current[k]=false}>{["↑","←","↓","→"][i]}</button>)}</div><button className="sa-fire" onPointerDown={()=>keys.current.fire=true} onPointerUp={()=>keys.current.fire=false} onPointerLeave={()=>keys.current.fire=false}>FIRE</button></div></section>:null}
+  {screen==="result"&&result&&<section className="sa-result"><span className="sa-kicker">{result.won?"SECTOR CLEARED":"MISSION FAILED"}</span><h2>{result.won?"EXCELLENT WORK, PILOT":"SHIP SYSTEMS OFFLINE"}</h2><p>{result.won?"The signal fragment has been recovered. Your next sector is now available.":"Your sortie has ended. Upgrade your ship and try again."}</p><div className="sa-result-stats"><div><small>FINAL SCORE</small><b>{result.score.toLocaleString()}</b></div><div><small>CREDITS EARNED</small><b>+{result.earned} CR</b></div><div><small>SECTORS CLEARED</small><b>{save.completed.length}/12</b></div></div>{result.achievements.length>0&&<p className="sa-new-achievement">✦ NEW ACHIEVEMENT: {result.achievements.join(", ").toUpperCase()}</p>}<div className="sa-result-actions"><button className="sa-primary" onClick={()=>setScreen("campaign")}>BACK TO CAMPAIGN</button><button className="sa-secondary" onClick={()=>setScreen("hangar")}>VISIT SHIPYARD</button>{result.won&&level<12&&<button className="sa-primary" onClick={()=>start(level+1)}>NEXT SECTOR →</button>}</div></section>:null}
+  <div className="sa-bottom-links"><button onClick={onEngineering}>OPEN SPACECRAFT ENGINEERING ↗</button><button onClick={onBack}>EXIT TO LUNAFORGE</button></div>
+ </main>
 }
