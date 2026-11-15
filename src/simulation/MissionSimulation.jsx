@@ -49,6 +49,8 @@ export default function MissionSimulation({
   const [resources, setResources] = useState(initialResourceStatus);
   const [events, setEvents] = useState([]);
   const [missionOutcome, setMissionOutcome] = useState(null);
+  const [observedAreas, setObservedAreas] = useState([]);
+  const observedAreasRef = useRef([]);
   const [logEntries, setLogEntries] = useState([
     makeLogEntry("Mission control ready", "The educational CubeSat scenario is ready to start."),
   ]);
@@ -97,12 +99,28 @@ export default function MissionSimulation({
 
     controllerRef.current = startSimulation({
       onUpdate: setSimulation,
-      onStageChange: (stage) => addLog(`Phase: ${stage.title}`, stage.description),
+      onStageChange: (stage) => {
+        addLog(`Phase: ${stage.title}`, stage.description);
+        if (stage.id === "observation") {
+          const ids = engineeringMission?.selectedComponentIds || [];
+          const hasCamera = ids.some((id) => id === "camera_basic" || id === "camera_advanced");
+          const hasAdcs = ids.some((id) => id === "adcs_basic" || id === "adcs_precise");
+          const captured = hasCamera && hasAdcs ? NILE_DELTA_AREAS.map((area) => area.id) : [];
+          observedAreasRef.current = captured;
+          setObservedAreas(captured);
+          addLog(
+            "Nile Delta observation pass",
+            captured.length
+              ? "Three synthetic observation areas were recorded: the coast, Lake Manzala wetlands, and agricultural / urban transition."
+              : "No observation scenes were recorded because a camera and ADCS are both required."
+          );
+        }
+      },
       onEvent: handleEvent,
       onComplete: (finalState) => {
         const outcome = evaluateNileDeltaMission({
           engineeringMission,
-          observedAreas: NILE_DELTA_AREAS.map((area) => area.id),
+          observedAreas: observedAreasRef.current,
           durationDays: missionConfig?.scenario?.durationDays ?? 7,
         });
         setSimulation(finalState);
@@ -134,6 +152,8 @@ export default function MissionSimulation({
     setSimulation(INITIAL_SIMULATION_STATE);
     setEvents([]);
     setMissionOutcome(null);
+    setObservedAreas([]);
+    observedAreasRef.current = [];
     setResources(initialResourceStatus);
     resourcesRef.current = initialResourceStatus;
     addLog("Simulation restarted", "The scenario was reset to its initial state.");
@@ -194,6 +214,19 @@ export default function MissionSimulation({
             <p className="lf-muted">{currentStage.description}</p>
             <div className="lf-stage-progress"><span style={{ width: `${simulation.stageProgress}%` }} /></div>
             <p className="lf-small">{currentStage.subtitle}</p>
+          </div>
+
+          <div className="lf-panel-card">
+            <p className="lf-eyebrow">OBSERVATION TARGETS</p>
+            <div className="lf-metrics">
+              {NILE_DELTA_AREAS.map((area) => (
+                <Metric
+                  key={area.id}
+                  label={area.name}
+                  value={observedAreas.includes(area.id) ? "Recorded" : "Pending"}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="lf-panel-card">
