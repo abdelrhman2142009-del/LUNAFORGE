@@ -88,11 +88,9 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
       log("Capture blocked: battery reserve is too low.");
       return;
     }
-    setCaptured((items) => {
-      const next = [...items, target.id];
-      onTargetsCaptured(next);
-      return next;
-    });
+    const nextCaptured = [...captured, target.id];
+    setCaptured(nextCaptured);
+    onTargetsCaptured(nextCaptured);
     setStoredDataMb((value) => value + 120);
     setBatteryPercent((value) => clamp(value - 4, 0, 100));
     log(`Image captured: ${target.name} · 120 MB added to onboard storage.`);
