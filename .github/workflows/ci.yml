@@ -20,5 +20,17 @@ jobs:
         run: npm install
       - name: Run automated tests
         run: npm test
+      - name: Generate dependency audit report
+        if: always()
+        run: |
+          npm audit --json > npm-audit-report.json || true
+          node --input-type=module -e 'import fs from "node:fs"; const r = JSON.parse(fs.readFileSync("npm-audit-report.json", "utf8")); console.log("Dependency audit summary:", JSON.stringify(r.metadata?.vulnerabilities ?? {}, null, 2)); for (const [name, item] of Object.entries(r.vulnerabilities ?? {})) console.log(`${name}: ${item.severity} — direct: ${item.isDirect}`);'
+      - name: Upload dependency audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.json
+          if-no-files-found: ignore
       - name: Build production app
         run: npm run build
