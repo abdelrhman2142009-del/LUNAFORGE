@@ -292,7 +292,7 @@ function App() {
           <div className="eyebrow">MISSION 001 / MISSION BRIEFING</div>
 
           <h1 className="page-title">
-            EARTH <span>OBSERVER.</span>
+            NILE DELTA <span>WATCH.</span>
           </h1>
 
           <p className="page-intro">
@@ -306,10 +306,10 @@ function App() {
               <h2>THE MISSION</h2>
 
               <p>
-                Design a small satellite equipped with an
-                observation payload. Your spacecraft must
-                collect image data, store it onboard, and
-                transmit it to a ground station.
+                Design a 6U observation satellite to investigate
+                the Nile Delta's coast, wetlands, and agricultural
+                and urban land patterns. Collect simulated scenes,
+                store them onboard, and transmit them to a ground station.
               </p>
 
               <div className="objective-highlight">
