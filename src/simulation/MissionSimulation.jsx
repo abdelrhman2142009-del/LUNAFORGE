@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { startSimulation } from "./simulationEngine.js";
 import { SIMULATION_STAGES, INITIAL_SIMULATION_STATE } from "./simulationStages.js";
-import { applySpaceEvent, pickRandomSpaceEvent } from "./SpaceEvents.js";
+import { applySpaceEvent } from "./SpaceEvents.js";
+import { evaluateNileDeltaMission, NILE_DELTA_AREAS } from "./missionObjectives.js";
 import WhatIfPanel from "./WhatIfPanel.jsx";
 import MissionLog from "./MissionLog.jsx";
 import "./simulation.css";
@@ -38,6 +39,8 @@ export default function MissionSimulation({
   resourceStatus: initialResourceStatus = {},
   missionValid,
   missionInputs = {},
+  engineeringMission,
+  missionConfig,
   onScenarioCompare = () => {},
   onSimulationComplete = () => {},
   onBack = () => {},
@@ -45,6 +48,7 @@ export default function MissionSimulation({
   const [simulation, setSimulation] = useState(INITIAL_SIMULATION_STATE);
   const [resources, setResources] = useState(initialResourceStatus);
   const [events, setEvents] = useState([]);
+  const [missionOutcome, setMissionOutcome] = useState(null);
   const [logEntries, setLogEntries] = useState([
     makeLogEntry("Mission control ready", "The educational CubeSat scenario is ready to start."),
   ]);
@@ -96,9 +100,18 @@ export default function MissionSimulation({
       onStageChange: (stage) => addLog(`Phase: ${stage.title}`, stage.description),
       onEvent: handleEvent,
       onComplete: (finalState) => {
+        const outcome = evaluateNileDeltaMission({
+          engineeringMission,
+          observedAreas: NILE_DELTA_AREAS.map((area) => area.id),
+          durationDays: missionConfig?.scenario?.durationDays ?? 7,
+        });
         setSimulation(finalState);
-        addLog("Simulation completed", "The five-phase educational mission timeline has finished.");
-        onSimulationComplete(finalState);
+        setMissionOutcome(outcome);
+        addLog(
+          "Mission evaluation completed",
+          `${outcome.status}: ${outcome.completedObjectives}/${outcome.totalObjectives} objectives completed; ${outcome.dataDownlinkedPercent.toFixed(1)}% of stored data downlinked.`
+        );
+        onSimulationComplete({ ...finalState, missionOutcome: outcome });
       },
     });
     addLog("Simulation started", "The mission timeline has begun.");
@@ -120,6 +133,7 @@ export default function MissionSimulation({
     controllerRef.current = null;
     setSimulation(INITIAL_SIMULATION_STATE);
     setEvents([]);
+    setMissionOutcome(null);
     setResources(initialResourceStatus);
     resourcesRef.current = initialResourceStatus;
     addLog("Simulation restarted", "The scenario was reset to its initial state.");
@@ -136,8 +150,8 @@ export default function MissionSimulation({
       <header className="lf-sim-header">
         <div>
           <p className="lf-eyebrow">LUNAFORGE / MISSION CONTROL</p>
-          <h1>Earth Observation CubeSat</h1>
-          <p className="lf-muted">Low Earth Orbit · Educational mission simulation</p>
+          <h1>{missionConfig?.mission?.name ?? "Nile Delta Watch"}</h1>
+          <p className="lf-muted">Nile Delta, Egypt · 500 km LEO · 7 scenario days (accelerated game timeline)</p>
         </div>
         <div className="lf-sim-header-actions">
           <button type="button" className="lf-button lf-button-secondary" onClick={onBack}>Back to analysis</button>
@@ -189,7 +203,7 @@ export default function MissionSimulation({
               <Metric label="Storage used" value={resources.storagePercent} unit="%" />
               <Metric label="Communication" value={resources.communication} />
             </div>
-            <p className="lf-footnote">Telemetry is populated by Member 3 integration when connected.</p>
+            <p className="lf-footnote">Telemetry is a simplified gameplay model, not live spacecraft data.</p>
           </div>
 
           <div className="lf-controls">
@@ -225,6 +239,35 @@ export default function MissionSimulation({
           })}
         </div>
       </section>
+
+      {missionOutcome && (
+        <section className="lf-timeline-card" aria-live="polite">
+          <div className="lf-timeline-heading">
+            <div>
+              <p className="lf-eyebrow">NILE DELTA WATCH / FINAL REPORT</p>
+              <h2>{missionOutcome.status}</h2>
+            </div>
+            <strong>{missionOutcome.completedObjectives}/{missionOutcome.totalObjectives} objectives</strong>
+          </div>
+          <div className="lf-metrics">
+            <Metric label="Areas observed" value={missionOutcome.areasObserved} unit={` / ${missionOutcome.areasTarget}`} />
+            <Metric label="Data generated" value={missionOutcome.generatedDataMB.toFixed(1)} unit=" MB" />
+            <Metric label="Data stored" value={missionOutcome.storedDataMB.toFixed(1)} unit=" MB" />
+            <Metric label="Data transmitted" value={missionOutcome.transmittedDataMB.toFixed(1)} unit=" MB" />
+            <Metric label="Downlinked" value={missionOutcome.dataDownlinkedPercent.toFixed(1)} unit="%" />
+          </div>
+          <ul className="lfx-event-list">
+            {missionOutcome.objectives.map((objective) => (
+              <li key={objective.id}>
+                <strong>{objective.completed ? "✓" : "○"} {objective.title}</strong>
+                <p>{objective.detail}</p>
+              </li>
+            ))}
+          </ul>
+          {missionOutcome.reasons.map((reason) => <p className="lfx-muted" key={reason}>{reason}</p>)}
+          <p className="lfx-disclaimer">{missionOutcome.educationalDisclaimer}</p>
+        </section>
+      )}
 
       <section className="lfx-feature-grid">
         <div className="lfx-card">
