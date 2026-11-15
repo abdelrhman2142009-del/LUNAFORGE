@@ -1,6 +1,7 @@
 // NASA Earth imagery configuration for LUNAFORGE.
 // The URLs below request NASA GIBS visualizations; they are not locally fabricated images.
 export const NASA_GIBS_WMS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi";
+export const NASA_EONET_EVENTS_URL = "https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=8";
 export const NASA_EARTH_TEXTURE_URL =
   `${NASA_GIBS_WMS}?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&FORMAT=image/jpeg&TRANSPARENT=false&LAYERS=BlueMarble_NextGeneration&CRS=EPSG:4326&BBOX=-90,-180,90,180&WIDTH=2048&HEIGHT=1024`;
 
