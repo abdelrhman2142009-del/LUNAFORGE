@@ -33,9 +33,9 @@ export function getDailyChallenge(date = new Date()) {
   const key = [date.getUTCFullYear(), String(date.getUTCMonth() + 1).padStart(2, "0"), String(date.getUTCDate()).padStart(2, "0")].join("-");
   const hash = [...key].reduce((value, char) => ((value * 31) + char.charCodeAt(0)) >>> 0, 7);
   const variants = [
-    { title: "SOLAR STORM RUN", briefing: "Solar flares arrive more often. Keep moving and save boost for the warning.", flareInterval: 14, coreGoal: 8, bonus: 400 },
-    { title: "CRYSTAL HARVEST", briefing: "Crystal asteroids are more common. Prioritize precision shots for bonus score.", flareInterval: 22, coreGoal: 9, bonus: 500 },
-    { title: "DEEP ORBIT RELAY", briefing: "Recover extra science data before reaching the rescue relay.", flareInterval: 19, coreGoal: 10, bonus: 650 },
+    { title: "SOLAR STORM RUN", briefing: "Solar flares arrive more often. Keep moving and save boost for the warning.", objectiveText: "Survive at least one solar flare without taking a hit.", flareInterval: 14, coreGoal: 8, bonus: 400 },
+    { title: "CRYSTAL HARVEST", briefing: "Crystal asteroids are more common. Prioritize precision shots for bonus score.", objectiveText: "Destroy at least three crystal asteroids.", flareInterval: 22, coreGoal: 9, bonus: 500 },
+    { title: "DEEP ORBIT RELAY", briefing: "Recover extra science data before reaching the rescue relay.", objectiveText: "Recover ten data cores and restore the relay.", flareInterval: 19, coreGoal: 10, bonus: 650 },
   ];
   return { dateKey: key, ...variants[hash % variants.length] };
 }
