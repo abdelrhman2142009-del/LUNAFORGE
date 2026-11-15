@@ -112,7 +112,9 @@ function drawScene(ctx, game, time) {
   ctx.fillText("SECTOR 07  /  NILE DELTA ORBIT", 22, 28);
   ctx.fillText("COLLECT DATA CORES  •  AVOID ASTEROIDS", WIDTH - 305, 28);
 }
+
 function shipIsVisible(ship, time) { return ship.invulnerable <= 0 || Math.floor(time / 90) % 2 === 0; }
+
 function burst(game, x, y, color, amount = 12) {
   for (let i = 0; i < amount; i++) {
     const angle = Math.random() * Math.PI * 2, speed = Math.random() * 150 + 35;
@@ -158,6 +160,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
     let previous = performance.now();
     let hudTimer = 0;
     const game = gameRef.current;
+    const statusRef = { current: status };
 
     const tick = (now) => {
       const dt = Math.min((now - previous) / 1000, 0.035);
@@ -237,7 +240,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       if (hudTimer > 0.12) { hudTimer = 0; syncHud(game); }
       if (statusRef.current === "playing") frame = requestAnimationFrame(tick);
     };
-    const statusRef = { current: status };
+
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [status]);
