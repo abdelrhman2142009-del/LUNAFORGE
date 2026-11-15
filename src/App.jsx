@@ -7,6 +7,7 @@ import { runEngineeringWhatIf } from "./engine/engineAdapter";
 import nileDeltaWatch from "./data/nile_delta_watch.json";
 import EarthGlobe from "./components/EarthGlobe";
 import NasaImageryPanel from "./components/NasaImageryPanel";
+import NasaEventsPanel from "./components/NasaEventsPanel";
 const features = [
   {
     number: "01",
@@ -215,6 +216,7 @@ function App() {
 
           <section className="page-section" aria-label="NASA Earth observation explorer">
             <NasaImageryPanel />
+            <NasaEventsPanel />
           </section>
 
           <section className="features-section" id="features">
