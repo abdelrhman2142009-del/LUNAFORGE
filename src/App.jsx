@@ -255,7 +255,13 @@ function App() {
       )}
 
       {/* PLAYABLE ARCADE GAME */}
-      {screen === "game" && <SpaceAdventure onBack={() => setScreen("home")} />}
+      {screen === "game" && (
+        <SpaceAdventure
+          onBack={() => setScreen("home")}
+          onEditDesign={() => setScreen("builder")}
+          engineeringReport={missionReport}
+        />
+      )}
 
       {/* MISSION SELECTION */}
 
@@ -458,7 +464,7 @@ function App() {
       {/* SPACECRAFT BUILDER */}
 
       {screen === "builder" && (
-        <Builder onProceed={openAnalysis} />
+        <Builder onProceed={openAnalysis} initialComponents={missionReport?.selectedComponents || []} />
       )}
 
       {/* MISSION ANALYSIS */}

@@ -1,11 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./SpaceAdventure.css";
+import { buildFlightProfile, getDailyChallenge } from "./engineeringProfile.js";
 
 const WIDTH = 960;
 const HEIGHT = 540;
-const CORE_GOAL = 8;
+const DISCOVERIES = [
+  { id: "voyager", title: "Voyager Memory", detail: "A fragment of an old deep-space probe telemetry log." },
+  { id: "ice", title: "Frozen Water Signature", detail: "A spectral reading suggests water ice trapped inside a nearby asteroid." },
+  { id: "micro", title: "Micro-Meteorite Sample", detail: "A rare mineral sample that could help explain the local asteroid field." },
+  { id: "beacon", title: "Unknown Beacon", detail: "An encrypted signal repeats from beyond the mapped relay corridor." },
+  { id: "map", title: "Lost Star Chart", detail: "A recovered navigation fragment reveals an unregistered route." },
+];
 
-function makeGame() {
+function makeGame(profile, challenge) {
   return {
     ship: { x: WIDTH / 2, y: HEIGHT - 90, vx: 0, vy: 0, invulnerable: 0 },
     stars: Array.from({ length: 130 }, () => ({
@@ -20,12 +27,23 @@ function makeGame() {
     shots: [],
     particles: [],
     pickups: [],
+    enemyShots: [],
+    boss: null,
+    bossDefeated: false,
+    bossShotTimer: 0,
     score: 0,
     coresCollected: 0,
     lives: 3,
     combo: 0,
     comboTimer: 0,
-    boost: 100,
+    boost: profile.boostCapacity,
+    profile,
+    challenge,
+    coreGoal: challenge.coreGoal,
+    discoveries: [],
+    crystalsDestroyed: 0,
+    flaresSurvived: 0,
+    storyMilestones: [],
     shield: 0,
     fireTimer: 0,
     rockTimer: 0,
@@ -171,6 +189,27 @@ function drawScene(ctx, game, time, boosting) {
   });
   ctx.shadowBlur = 0;
 
+  if (game.boss) {
+    ctx.save();
+    ctx.translate(game.boss.x, game.boss.y);
+    ctx.shadowBlur = 24;
+    ctx.shadowColor = "#ff7d9b";
+    ctx.fillStyle = "#552b54";
+    ctx.strokeStyle = "#ff9bb2";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, -30); ctx.lineTo(34, -8); ctx.lineTo(25, 25); ctx.lineTo(0, 34); ctx.lineTo(-25, 25); ctx.lineTo(-34, -8); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ffe6ef"; ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.fillRect(game.boss.x - 38, game.boss.y - 46, 76, 5);
+    ctx.fillStyle = "#ff819f"; ctx.fillRect(game.boss.x - 38, game.boss.y - 46, 76 * game.boss.hp / game.boss.maxHp, 5);
+  }
+  game.enemyShots.forEach((shot) => {
+    ctx.fillStyle = "#ff91ad"; ctx.shadowBlur = 12; ctx.shadowColor = "#ff527c";
+    ctx.beginPath(); ctx.arc(shot.x, shot.y, 5, 0, Math.PI * 2); ctx.fill();
+  });
+  ctx.shadowBlur = 0;
   game.pickups.forEach((pickup) => {
     ctx.save();
     ctx.translate(pickup.x, pickup.y);
@@ -238,10 +277,25 @@ function drawScene(ctx, game, time, boosting) {
   ctx.restore();
 }
 
-export default function SpaceAdventure({ onBack = () => {} }) {
+export default function SpaceAdventure({ onBack = () => {}, engineeringReport = null, onEditDesign = () => {} }) {
+  const profile = useMemo(() => buildFlightProfile(engineeringReport), [engineeringReport]);
+  const dailyChallenge = useMemo(() => getDailyChallenge(), []);
+  const [journal, setJournal] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem("lunaforge-discovery-journal") || "[]"); }
+    catch { return []; }
+  });
+  const [achievements, setAchievements] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem("lunaforge-achievements") || "[]"); }
+    catch { return []; }
+  });
+  const [flightRecords, setFlightRecords] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem("lunaforge-flight-records") || "[]"); }
+    catch { return []; }
+  });
   const canvasRef = useRef(null);
   const gameRef = useRef(makeGame());
   const keysRef = useRef({});
+  const recordedRunRef = useRef(false);
   const [status, setStatus] = useState("ready");
   const [hud, setHud] = useState({ score: 0, cores: 0, lives: 3, combo: 0, boost: 100, beacon: false });
   const [bestScore, setBestScore] = useState(0);
@@ -255,22 +309,45 @@ export default function SpaceAdventure({ onBack = () => {} }) {
     window.localStorage.setItem("lunaforge-orbit-runner-best", String(bestScore));
   }, [bestScore]);
 
+  useEffect(() => {
+    window.localStorage.setItem("lunaforge-discovery-journal", JSON.stringify(journal));
+  }, [journal]);
+
+  useEffect(() => {
+    window.localStorage.setItem("lunaforge-achievements", JSON.stringify(achievements));
+  }, [achievements]);
+
+  useEffect(() => {
+    window.localStorage.setItem("lunaforge-flight-records", JSON.stringify(flightRecords));
+  }, [flightRecords]);
+
+  useEffect(() => {
+    if ((status === "won" || status === "lost") && !recordedRunRef.current) {
+      recordedRunRef.current = true;
+      const game = gameRef.current;
+      const record = { score: game.score, cores: game.coresCollected, seconds: Math.floor(game.elapsed), won: status === "won", date: dailyChallenge.dateKey };
+      setFlightRecords((current) => [...current, record].sort((a, b) => b.score - a.score).slice(0, 5));
+    }
+  }, [status, dailyChallenge.dateKey]);
+
   function syncHud(game) {
     setHud({
       score: game.score,
       cores: game.coresCollected,
+      coreGoal: game.coreGoal,
       lives: game.lives,
       combo: game.combo,
-      boost: Math.round(game.boost),
+      boost: Math.round((game.boost / game.profile.boostCapacity) * 100),
       beacon: game.beaconReached,
     });
     setBestScore((best) => Math.max(best, game.score));
   }
 
   function startGame() {
-    gameRef.current = makeGame();
+    gameRef.current = makeGame(profile, dailyChallenge);
     keysRef.current = {};
-    setHud({ score: 0, cores: 0, lives: 3, combo: 0, boost: 100, beacon: false });
+    recordedRunRef.current = false;
+    setHud({ score: 0, cores: 0, coreGoal: dailyChallenge.coreGoal, lives: 3, combo: 0, boost: 100, beacon: false });
     setStatus("playing");
   }
 
@@ -307,7 +384,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       const ship = game.ship;
       const keys = keysRef.current;
       const boosting = Boolean((keys.Shift || keys.ShiftLeft || keys.ShiftRight) && game.boost > 1);
-      const speed = boosting ? 470 : 300;
+      const speed = (boosting ? 470 : 300) * game.profile.agility;
       const dx = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0);
       const dy = (keys.ArrowDown || keys.s ? 1 : 0) - (keys.ArrowUp || keys.w ? 1 : 0);
       const length = Math.hypot(dx, dy) || 1;
@@ -319,7 +396,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       ship.y = Math.max(48, Math.min(HEIGHT - 30, ship.y + ship.vy * dt));
       ship.invulnerable = Math.max(0, ship.invulnerable - dt);
       game.shield = Math.max(0, game.shield - dt);
-      game.boost = Math.min(100, game.boost + (boosting ? -42 : 19) * dt);
+      game.boost = Math.min(game.profile.boostCapacity, game.boost + (boosting ? -42 : game.profile.boostRecharge) * dt);
       game.comboTimer = Math.max(0, game.comboTimer - dt);
       game.noticeTimer = Math.max(0, game.noticeTimer - dt);
       game.shake = Math.max(0, game.shake - dt * 2.5);
@@ -333,6 +410,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       game.fireTimer -= dt;
       game.pickupTimer += dt;
       game.flareTimer += dt;
+      game.bossShotTimer += dt;
 
       if (game.rockTimer > Math.max(0.38, 1.05 - game.coresCollected * 0.045)) {
         game.rockTimer = 0;
@@ -346,7 +424,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
           rotation: 0,
           spin: (Math.random() - 0.5) * 2.4,
           seed: Math.random() * 20,
-          kind: Math.random() < 0.16 ? "crystal" : "rock",
+          kind: Math.random() < (game.challenge.title === "CRYSTAL HARVEST" ? 0.3 : 0.16) ? "crystal" : "rock",
         });
       }
 
@@ -367,12 +445,22 @@ export default function SpaceAdventure({ onBack = () => {} }) {
         }
       }
 
+      if (game.coresCollected >= 6 && !game.boss && !game.bossDefeated) {
+        game.boss = { x: WIDTH / 2, y: 100, vx: 150, hp: 6, maxHp: 6, phase: 0 };
+        notify(game, "UNKNOWN SENTINEL DETECTED — DISABLE ITS SHIELD");
+        burst(game, WIDTH / 2, 100, "#ff8ca8", 28, 200);
+      }
+
+      if (game.coresCollected >= 3 && !game.storyMilestones.includes("research-log")) {
+        game.storyMilestones.push("research-log");
+        notify(game, "CONTROL: We found the station log. Something was guarding this relay.");
+      }
       if (game.coresCollected >= 5 && !game.beacon && !game.beaconReached) {
         game.beacon = { x: 100 + Math.random() * (WIDTH - 200), y: 115, phase: 0 };
         notify(game, "DISTRESS SIGNAL FOUND — REACH THE GOLD RELAY");
       }
 
-      if (game.flareTimer > 19 && !game.flare) {
+      if (game.flareTimer > game.challenge.flareInterval && !game.flare) {
         game.flareTimer = 0;
         game.flare = { x: WIDTH + 45, y: 0, life: 3.8 };
         notify(game, "SOLAR FLARE WARNING — MOVE CLEAR OF THE GOLD LINE");
@@ -380,16 +468,34 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       if (game.flare) {
         game.flare.x -= 310 * dt;
         game.flare.life -= dt;
-        if (Math.abs(ship.x - game.flare.x) < 43 && ship.y > 35 && ship.y < HEIGHT - 20) damage();
-        if (game.flare.life <= 0 || game.flare.x < -60) game.flare = null;
+        if (Math.abs(ship.x - game.flare.x) < 43 && ship.y > 35 && ship.y < HEIGHT - 20) {
+          game.flare.hit = true;
+          damage();
+        }
+        if (game.flare.life <= 0 || game.flare.x < -60) {
+          if (!game.flare.hit) game.flaresSurvived += 1;
+          game.flare = null;
+        }
       }
 
       if ((keys[" "] || keys.Space) && game.fireTimer <= 0) {
         game.shots.push({ x: ship.x, y: ship.y - 25, vy: -560 });
-        game.fireTimer = 0.22;
+        game.fireTimer = game.profile.pulseCooldown;
       }
 
       game.shots.forEach((shot) => { shot.y += shot.vy * dt; });
+      if (game.boss) {
+        game.boss.phase += dt;
+        game.boss.x += game.boss.vx * dt;
+        game.boss.y = 100 + Math.sin(game.boss.phase * 2.1) * 24;
+        if (game.boss.x < 65 || game.boss.x > WIDTH - 65) game.boss.vx *= -1;
+        if (game.bossShotTimer > (game.boss.hp <= 3 ? 1.0 : 1.55)) {
+          game.bossShotTimer = 0;
+          const angle = Math.atan2(ship.y - game.boss.y, ship.x - game.boss.x);
+          game.enemyShots.push({ x: game.boss.x, y: game.boss.y + 22, vx: Math.cos(angle) * 190, vy: Math.sin(angle) * 190 });
+        }
+      }
+      game.enemyShots.forEach((shot) => { shot.x += shot.vx * dt; shot.y += shot.vy * dt; });
       game.rocks.forEach((rock) => {
         rock.x += rock.vx * dt;
         rock.y += rock.vy * dt;
@@ -406,6 +512,34 @@ export default function SpaceAdventure({ onBack = () => {} }) {
         p.life -= dt;
       });
 
+      if (game.boss) {
+        for (let i = game.shots.length - 1; i >= 0; i -= 1) {
+          const shot = game.shots[i];
+          if (Math.hypot(shot.x - game.boss.x, shot.y - game.boss.y) < 38) {
+            game.shots.splice(i, 1);
+            game.boss.hp -= 1;
+            game.score += 120;
+            burst(game, shot.x, shot.y, "#ff9bb2", 8, 100);
+            if (game.boss.hp <= 0) {
+              const defeated = game.boss;
+              game.boss = null;
+              game.bossDefeated = true;
+              game.score += 700;
+              game.storyMilestones.push("sentinel-disabled");
+              notify(game, "CONTROL: Sentinel disabled. The rescue channel is open.");
+              burst(game, defeated.x, defeated.y, "#ffd18a", 48, 260);
+            }
+          }
+        }
+      }
+      for (let i = game.enemyShots.length - 1; i >= 0; i -= 1) {
+        const shot = game.enemyShots[i];
+        if (Math.hypot(ship.x - shot.x, ship.y - shot.y) < 22) {
+          game.enemyShots.splice(i, 1);
+          damage();
+        }
+      }
+
       for (let i = game.rocks.length - 1; i >= 0; i -= 1) {
         const rock = game.rocks[i];
         const shotIndex = game.shots.findIndex((shot) => Math.hypot(shot.x - rock.x, shot.y - rock.y) < rock.radius + 7);
@@ -413,6 +547,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
           game.shots.splice(shotIndex, 1);
           game.rocks.splice(i, 1);
           game.score += rock.kind === "crystal" ? 100 : 50;
+          if (rock.kind === "crystal") game.crystalsDestroyed += 1;
           game.combo += 1;
           game.comboTimer = 3.2;
           burst(game, rock.x, rock.y, rock.kind === "crystal" ? "#7bf5e8" : "#ffb66e", 15);
@@ -426,14 +561,23 @@ export default function SpaceAdventure({ onBack = () => {} }) {
 
       for (let i = game.cores.length - 1; i >= 0; i -= 1) {
         const core = game.cores[i];
-        if (Math.hypot(ship.x - core.x, ship.y - core.y) < 29) {
+        if (Math.hypot(ship.x - core.x, ship.y - core.y) < game.profile.scanRadius) {
           game.cores.splice(i, 1);
           game.coresCollected += 1;
-          game.score += 125 + Math.min(150, game.combo * 10);
+          game.score += Math.round((125 + Math.min(150, game.combo * 10)) * game.profile.scienceMultiplier * game.profile.communicationsBonus);
           game.combo += 1;
           game.comboTimer = 3.2;
           burst(game, core.x, core.y, "#5dffe1", 18);
-          notify(game, "DATA CORE SECURED  +" + (125 + Math.min(150, game.combo * 10)));
+          notify(game, "DATA CORE SECURED — SCIENCE DATA +");
+          if (Math.random() < 0.18) {
+            const candidates = DISCOVERIES.filter((item) => !game.discoveries.includes(item.id));
+            if (candidates.length) {
+              const found = candidates[Math.floor(Math.random() * candidates.length)];
+              game.discoveries.push(found.id);
+              setJournal((current) => current.some((item) => item.id === found.id) ? current : [...current, found]);
+              notify(game, "SECRET DISCOVERY: " + found.title.toUpperCase());
+            }
+          }
         }
       }
 
@@ -442,8 +586,8 @@ export default function SpaceAdventure({ onBack = () => {} }) {
         if (Math.hypot(ship.x - pickup.x, ship.y - pickup.y) < 30) {
           game.pickups.splice(i, 1);
           if (pickup.type === "shield") {
-            game.shield = 5;
-            notify(game, "PHASE SHIELD ACTIVE — 5 SECONDS");
+            game.shield = game.profile.shieldDuration;
+            notify(game, "PHASE SHIELD ACTIVE — " + game.profile.shieldDuration.toFixed(0) + " SECONDS");
             burst(game, ship.x, ship.y, "#74ddff", 20);
           } else {
             game.lives = Math.min(3, game.lives + 1);
@@ -462,16 +606,23 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       }
 
       game.shots = game.shots.filter((shot) => shot.y > -25);
+      game.enemyShots = game.enemyShots.filter((shot) => shot.x > -20 && shot.x < WIDTH + 20 && shot.y > -20 && shot.y < HEIGHT + 20);
       game.rocks = game.rocks.filter((rock) => rock.y < HEIGHT + rock.radius + 20);
       game.cores = game.cores.filter((core) => core.y < HEIGHT + 25);
       game.pickups = game.pickups.filter((pickup) => pickup.y < HEIGHT + 25);
       game.particles = game.particles.filter((p) => p.life > 0);
 
       if (game.comboTimer <= 0) game.combo = 0;
-      if (game.coresCollected >= CORE_GOAL && game.beaconReached) {
-        game.score += 250;
+      const dailyObjectiveComplete = game.challenge.title === "CRYSTAL HARVEST"
+        ? game.crystalsDestroyed >= 3
+        : game.challenge.title === "SOLAR STORM RUN"
+          ? game.flaresSurvived >= 1
+          : true;
+      if (game.coresCollected >= game.coreGoal && game.beaconReached && game.bossDefeated && dailyObjectiveComplete) {
+        game.score += 250 + game.challenge.bonus;
         burst(game, ship.x, ship.y, "#8df7ff", 42, 250);
         syncHud(game);
+        setAchievements((current) => [...new Set([...current, "first-rescue", ...(game.score >= 2000 ? ["high-orbit-score"] : []), ...(game.discoveries.length > 0 ? ["curious-pilot"] : []), "sentinel-breaker"])]);
         setStatus("won");
         running = false;
       }
@@ -524,7 +675,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
         ? "RELAY RESTORED."
         : "SIGNAL LOST.";
   const overlayText = status === "ready"
-    ? "Pilot through a living asteroid field, recover 8 data cores, and reach the golden distress relay. Watch for solar flares."
+    ? "Pilot through a living asteroid field, recover " + dailyChallenge.coreGoal + " data cores, disable the unknown sentinel, and reach the golden distress relay."
     : status === "paused"
       ? "Your spacecraft and mission progress are on hold."
       : status === "won"
@@ -542,6 +693,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
           <p className="sa-kicker">LUNAFORGE ORIGINAL ARCADE</p>
           <h1>ORBIT <span>RUNNER</span></h1>
           <p>Explore the unknown. Bring the signal home.</p>
+          <div className="sa-profile-line"><span>{profile.className}</span><span>{profile.hasDesign ? "ENGINEERING LOADOUT LINKED" : "DEFAULT TEST CRAFT"}</span></div>
         </div>
         <div className="sa-best"><small>PERSONAL BEST</small><strong>{bestScore.toLocaleString()}</strong></div>
       </header>
@@ -549,11 +701,11 @@ export default function SpaceAdventure({ onBack = () => {} }) {
       <section className="sa-game-shell">
         <div className="sa-hud">
           <div><small>SCORE</small><strong>{hud.score.toLocaleString()}</strong></div>
-          <div><small>DATA CORES</small><strong>{hud.cores} <em>/ {CORE_GOAL}</em></strong></div>
+          <div><small>DATA CORES</small><strong>{hud.cores} <em>/ {hud.coreGoal || dailyChallenge.coreGoal}</em></strong></div>
           <div><small>HULL</small><strong className="sa-lives">{"◆ ".repeat(hud.lives)}<span>{"◇ ".repeat(3 - hud.lives)}</span></strong></div>
           <div><small>COMBO</small><strong className="sa-combo">x{Math.max(1, hud.combo)}</strong></div>
           <div className="sa-boost-stat"><small>BOOST</small><div className="sa-boost-track"><i style={{ width: hud.boost + "%" }} /></div></div>
-          <div><small>RELAY</small><strong className={hud.beacon ? "sa-relay-done" : ""}>{hud.beacon ? "ONLINE" : "SEARCH"}</strong></div>
+          <div><small>RELAY / BOSS</small><strong className={hud.beacon ? "sa-relay-done" : ""}>{hud.beacon ? "ONLINE" : gameRef.current.bossDefeated ? "CLEAR" : "SEARCH"}</strong></div>
         </div>
 
         <div className="sa-canvas-wrap">
@@ -566,7 +718,18 @@ export default function SpaceAdventure({ onBack = () => {} }) {
               <span>{status === "won" ? "MISSION COMPLETE" : status === "lost" ? "MISSION FAILED" : status === "paused" ? "PAUSED" : "FLIGHT BRIEFING"}</span>
               <h2>{overlayTitle}</h2>
               <p>{overlayText}</p>
-              {status === "ready" && <div className="sa-objectives"><span>01 / RECOVER 8 DATA CORES</span><span>02 / RESTORE THE GOLD RELAY</span><span>03 / SURVIVE THE SOLAR FLARE</span></div>}
+              {(status === "won" || status === "lost") && (
+                <div className="sa-debrief">
+                  <div><small>FINAL SCORE</small><strong>{gameRef.current.score.toLocaleString()}</strong></div>
+                  <div><small>DATA CORES</small><strong>{gameRef.current.coresCollected}/{gameRef.current.coreGoal}</strong></div>
+                  <div><small>FLIGHT TIME</small><strong>{Math.floor(gameRef.current.elapsed)}s</strong></div>
+                  <div><small>DISCOVERIES</small><strong>{gameRef.current.discoveries.length}</strong></div>
+                  <div><small>SENTINEL</small><strong>{gameRef.current.bossDefeated ? "CLEAR" : "ACTIVE"}</strong></div>
+                  <div><small>DAILY TASK</small><strong>{gameRef.current.challenge.title === "CRYSTAL HARVEST" ? gameRef.current.crystalsDestroyed + "/3 CRYSTALS" : gameRef.current.challenge.title === "SOLAR STORM RUN" ? gameRef.current.flaresSurvived + "/1 FLARE" : "10 CORES"}</strong></div>
+                  <p>{status === "won" ? "RESCUE CONFIRMED · DAILY BONUS INCLUDED" : "FLIGHT LOG SAVED · REVIEW YOUR ENGINEERING LOADOUT"}</p>
+                </div>
+              )}
+              {status === "ready" && <div className="sa-objectives"><span>01 / RECOVER {dailyChallenge.coreGoal} DATA CORES</span><span>02 / DISABLE THE SENTINEL</span><span>03 / RESTORE THE GOLD RELAY</span><span>03 / DISABLE THE SENTINEL</span><span>04 / {dailyChallenge.objectiveText}</span></div>}
               <button onClick={status === "ready" || status === "won" || status === "lost" ? startGame : () => setStatus("playing")}>
                 {status === "ready" ? "▶ LAUNCH MISSION" : status === "paused" ? "▶ RESUME FLIGHT" : "↻ FLY AGAIN"}
               </button>
@@ -582,8 +745,18 @@ export default function SpaceAdventure({ onBack = () => {} }) {
         </div>
       </section>
 
+      <section className="sa-meta-grid">
+        <article className="sa-meta-card sa-challenge-card"><small>DAILY FLIGHT CHALLENGE · {dailyChallenge.dateKey}</small><strong>{dailyChallenge.title}</strong><p>{dailyChallenge.briefing}</p><p className="sa-challenge-objective">DAILY OBJECTIVE: {dailyChallenge.objectiveText}</p><span>COMPLETION BONUS · {dailyChallenge.bonus} PTS</span></article>
+        <article className="sa-meta-card"><small>ENGINEERING FLIGHT PROFILE</small><strong>{profile.className}</strong><p>Mass {profile.massKg.toFixed(2)} kg · Battery {profile.batteryWh.toFixed(0)} Wh · Solar {profile.solarOutput.toFixed(1)} W</p><p>Agility ×{profile.agility.toFixed(2)} · Boost recharge {profile.boostRecharge.toFixed(1)}/s · Science ×{(profile.scienceMultiplier * profile.communicationsBonus).toFixed(2)}</p><button type="button" onClick={onEditDesign}>EDIT SPACECRAFT DESIGN ↗</button></article>
+      </section>
+      <section className="sa-journal-panel">
+        <div><small>EXPLORATION JOURNAL</small><strong>{journal.length} / {DISCOVERIES.length} DISCOVERIES</strong><p>Hidden telemetry, samples and navigation fragments are saved between flights.</p></div>
+        <div className="sa-journal-list">{journal.length ? journal.map((item) => <article key={item.id}><b>{item.title}</b><span>{item.detail}</span></article>) : <span className="sa-journal-empty">No discoveries yet. Search for data cores to uncover secrets.</span>}</div>
+        <div className="sa-achievements"><small>UNLOCKED ACHIEVEMENTS</small>{achievements.length ? achievements.map((id) => <span key={id}>✦ {id === "first-rescue" ? "FIRST RESCUE" : id === "high-orbit-score" ? "HIGH ORBIT SCORE" : id === "curious-pilot" ? "CURIOUS PILOT" : "SENTINEL BREAKER"}</span>) : <span>Complete a rescue or uncover a secret to earn your first achievement.</span>}</div>
+        <div className="sa-flight-records"><small>LOCAL FLIGHT RECORDS</small>{flightRecords.length ? flightRecords.map((record, index) => <span key={record.date + "-" + index}><b>#{index + 1} · {record.score.toLocaleString()} PTS</b><i>{record.won ? "RESCUE" : "FLIGHT"} · {record.cores} CORES · {record.seconds}s</i></span>) : <span>Complete a flight to create your first record.</span>}</div>
+      </section>
       <div className="sa-instructions">
-        <div><strong>MISSION CONTROL</strong><p>Recover eight data cores, locate the gold relay after core five, and restore its signal. Boost through tight gaps, destroy crystal rocks for bonus points, and collect repair or shield modules.</p></div>
+        <div><strong>MISSION CONTROL</strong><p>Recover the daily core target, disable the orbital sentinel, and restore the gold relay. Your spacecraft engineering affects handling, boost, scanning and pulse systems. Collect discoveries, crystal samples, repair modules and shields.</p></div>
         <div className="sa-key-guide">
           <span>WASD / ARROWS <small>STEER</small></span>
           <span>SPACE <small>PULSE</small></span>
@@ -604,7 +777,7 @@ export default function SpaceAdventure({ onBack = () => {} }) {
           <button className="sa-boost" onPointerDown={() => hold("Shift", true)} onPointerUp={() => hold("Shift", false)} onPointerCancel={() => hold("Shift", false)} onPointerLeave={() => hold("Shift", false)}>BOOST</button>
         </div>
       </div>
-      <p className="sa-disclaimer">LUNAFORGE flight systems use fictional arcade physics and simulated mission events.</p>
+      <p className="sa-disclaimer">Engineering-to-gameplay values are simplified educational game mechanics, not real spacecraft performance predictions.</p>
     </main>
   );
 }
