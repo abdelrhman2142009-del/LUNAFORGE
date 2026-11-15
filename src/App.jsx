@@ -59,7 +59,7 @@ function App() {
   };
   const cameraUpgrade = missionReport?.selectedComponents?.some((item) => item.id === "camera-1")
     ? missionReport.selectedComponents.map((item) => item.id === "camera-1"
-        ? { ...item, id: "camera-2", name: "Advanced Earth Camera", mass: 0.8, cost: 220, power: 5, dataGenerationMBPerMinute: 20 }
+        ? { ...item, id: "camera-2", name: "Advanced Earth Camera", mass: 0.8, cost: 220, power: 5, dataPerImageMB: 60, imagesPerDay: 3 }
         : item)
     : null;
   const whatIfResult = cameraUpgrade && engineAnalysis
