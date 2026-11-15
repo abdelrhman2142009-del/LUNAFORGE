@@ -2,9 +2,9 @@ name: LUNAFORGE CI
 
 on:
   push:
-    branches: [main, member-5-integration-deliverables, member-1-nile-delta-watch, feature/engineering-driven-adventure]
+    branches: [main, member-5-integration-deliverables, member-1-nile-delta-watch, feature/dynamic-space-gameplay]
   pull_request:
-    branches: [main, feature/dynamic-space-gameplay, feature/orbit-runner-arcade]
+    branches: [main, feature/dynamic-space-gameplay]
 
 jobs:
   verify:
