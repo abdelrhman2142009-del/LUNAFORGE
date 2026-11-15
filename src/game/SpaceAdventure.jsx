@@ -285,9 +285,14 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
     try { return JSON.parse(window.localStorage.getItem("lunaforge-achievements") || "[]"); }
     catch { return []; }
   });
+  const [flightRecords, setFlightRecords] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem("lunaforge-flight-records") || "[]"); }
+    catch { return []; }
+  });
   const canvasRef = useRef(null);
   const gameRef = useRef(makeGame());
   const keysRef = useRef({});
+  const recordedRunRef = useRef(false);
   const [status, setStatus] = useState("ready");
   const [hud, setHud] = useState({ score: 0, cores: 0, lives: 3, combo: 0, boost: 100, beacon: false });
   const [bestScore, setBestScore] = useState(0);
@@ -309,6 +314,19 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
     window.localStorage.setItem("lunaforge-achievements", JSON.stringify(achievements));
   }, [achievements]);
 
+  useEffect(() => {
+    window.localStorage.setItem("lunaforge-flight-records", JSON.stringify(flightRecords));
+  }, [flightRecords]);
+
+  useEffect(() => {
+    if ((status === "won" || status === "lost") && !recordedRunRef.current) {
+      recordedRunRef.current = true;
+      const game = gameRef.current;
+      const record = { score: game.score, cores: game.coresCollected, seconds: Math.floor(game.elapsed), won: status === "won", date: dailyChallenge.dateKey };
+      setFlightRecords((current) => [...current, record].sort((a, b) => b.score - a.score).slice(0, 5));
+    }
+  }, [status, dailyChallenge.dateKey]);
+
   function syncHud(game) {
     setHud({
       score: game.score,
@@ -325,6 +343,7 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
   function startGame() {
     gameRef.current = makeGame(profile, dailyChallenge);
     keysRef.current = {};
+    recordedRunRef.current = false;
     setHud({ score: 0, cores: 0, coreGoal: dailyChallenge.coreGoal, lives: 3, combo: 0, boost: 100, beacon: false });
     setStatus("playing");
   }
@@ -712,7 +731,8 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
       <section className="sa-journal-panel">
         <div><small>EXPLORATION JOURNAL</small><strong>{journal.length} / {DISCOVERIES.length} DISCOVERIES</strong><p>Hidden telemetry, samples and navigation fragments are saved between flights.</p></div>
         <div className="sa-journal-list">{journal.length ? journal.map((item) => <article key={item.id}><b>{item.title}</b><span>{item.detail}</span></article>) : <span className="sa-journal-empty">No discoveries yet. Search for data cores to uncover secrets.</span>}</div>
-        <div className="sa-achievements"><small>UNLOCKED ACHIEVEMENTS</small>{achievements.length ? achievements.map((id) => <span key={id}>✦ {id === "first-rescue" ? "FIRST RESCUE" : id === "high-orbit-score" ? "HIGH ORBIT SCORE" : "CURIOUS PILOT"}</span>) : <span>Complete a rescue or uncover a secret to earn your first achievement.</span>}</div>
+        <div className="sa-achievements"><small>UNLOCKED ACHIEVEMENTS</small>{achievements.length ? achievements.map((id) => <span key={id}>✦ {id === "first-rescue" ? "FIRST RESCUE" : id === "high-orbit-score" ? "HIGH ORBIT SCORE" : id === "curious-pilot" ? "CURIOUS PILOT" : "SENTINEL BREAKER"}</span>) : <span>Complete a rescue or uncover a secret to earn your first achievement.</span>}</div>
+        <div className="sa-flight-records"><small>LOCAL FLIGHT RECORDS</small>{flightRecords.length ? flightRecords.map((record, index) => <span key={record.date + "-" + index}><b>#{index + 1} · {record.score.toLocaleString()} PTS</b><i>{record.won ? "RESCUE" : "FLIGHT"} · {record.cores} CORES · {record.seconds}s</i></span>) : <span>Complete a flight to create your first record.</span>}</div>
       </section>
       <div className="sa-instructions">
         <div><strong>MISSION CONTROL</strong><p>Recover eight data cores, locate the gold relay after core five, and restore its signal. Boost through tight gaps, destroy crystal rocks for bonus points, and collect repair or shield modules.</p></div>
