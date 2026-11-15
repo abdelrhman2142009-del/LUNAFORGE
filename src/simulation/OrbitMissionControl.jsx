@@ -48,6 +48,7 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
   const cameraSelected = engineeringMission?.selectedComponentIds?.some((id) => id === "camera_basic" || id === "camera_advanced");
   const adcsSelected = engineeringMission?.selectedComponentIds?.some((id) => id === "adcs_basic" || id === "adcs_precise");
   const downlinkMbps = Number(engineeringMission?.metrics?.downlinkRateMbps) || 1;
+  const storageCapacityMb = Math.max(0, Number(engineeringMission?.metrics?.storageGb || 0) * 1024);
   const missionComplete = elapsedSeconds >= MISSION_DURATION_SECONDS;
 
   useEffect(() => {
@@ -87,6 +88,10 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
     }
     if (batteryPercent < 5) {
       log("Capture blocked: battery reserve is too low.");
+      return;
+    }
+    if (storageCapacityMb <= 0 || storedDataMb + 120 > storageCapacityMb) {
+      log("Capture blocked: onboard storage is full or no storage capacity is configured.");
       return;
     }
     const nextCaptured = [...captured, target.id];
@@ -187,7 +192,7 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
         <div className="lf-orbit-ops">
           <div className="lf-orbit-resource-grid">
             <div><small>BATTERY</small><strong>{batteryPercent.toFixed(1)}%</strong><div className="lf-orbit-meter"><span style={{ width: `${batteryPercent}%` }} /></div></div>
-            <div><small>ONBOARD STORAGE</small><strong>{storedDataMb.toFixed(0)} MB</strong><div className="lf-orbit-meter"><span style={{ width: `${Math.min(100, storedDataMb / 12.8)}%` }} /></div></div>
+            <div><small>ONBOARD STORAGE</small><strong>{storedDataMb.toFixed(0)} / {storageCapacityMb.toFixed(0)} MB</strong><div className="lf-orbit-meter"><span style={{ width: `${storageCapacityMb > 0 ? Math.min(100, (storedDataMb / storageCapacityMb) * 100) : 0}%` }} /></div></div>
             <div><small>DOWNLINKED</small><strong>{downlinkedDataMb.toFixed(1)} MB</strong><div className="lf-orbit-meter"><span style={{ width: `${downlinkPercent}%` }} /></div></div>
           </div>
 
@@ -205,8 +210,8 @@ export default function OrbitMissionControl({ engineeringMission, onTargetsCaptu
             <span>{targetInView ? "TARGET IN CAMERA FOOTPRINT" : "TARGET NOT CURRENTLY VISIBLE"}</span>
             <small>{target.science} · {target.latitudeDeg.toFixed(1)}°N, {target.longitudeDeg.toFixed(1)}°E</small>
           </div>
-          <button type="button" className="lf-orbit-capture" onClick={captureTarget} disabled={captured.includes(target.id) || missionComplete}>
-            {captured.includes(target.id) ? "TARGET ALREADY CAPTURED" : "CAPTURE IMAGE · 120 MB"}
+          <button type="button" className="lf-orbit-capture" onClick={captureTarget} disabled={captured.includes(target.id) || missionComplete || !cameraSelected || !adcsSelected || batteryPercent < 5 || storageCapacityMb <= 0 || storedDataMb + 120 > storageCapacityMb}>
+            {captured.includes(target.id) ? "TARGET ALREADY CAPTURED" : !cameraSelected || !adcsSelected ? "CAMERA + ADCS REQUIRED" : storedDataMb + 120 > storageCapacityMb ? "STORAGE CAPACITY REACHED" : "CAPTURE IMAGE · 120 MB"}
           </button>
           <div className="lf-orbit-controls">
             <button type="button" onClick={() => setRunning((value) => !value)} disabled={missionComplete}>{running ? "PAUSE ORBIT" : "START / RESUME ORBIT"}</button>
