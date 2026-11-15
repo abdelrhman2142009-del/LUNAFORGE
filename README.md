@@ -13,6 +13,12 @@ LUNAFORGE is an educational space-engineering platform built with React and Vite
 - Seven-day fictional mission model with three observation areas, onboard storage, downlink tracking, and an objective-based final report (shown through an accelerated 28-second timeline).
 - Space-engineering glossary.
 
+## Orbit-based gameplay
+
+The mission-control screen includes an interactive orbital-operations mode. A simplified circular two-body model calculates satellite orbital phase, position, ground-track latitude/longitude, and orbital period from elapsed mission time. Players can accelerate mission time, wait for a target to enter the simplified camera footprint, capture an image, manage onboard storage and battery, and transmit stored data while the satellite is within the simplified Cairo ground-station footprint. Captured target areas are passed back to the mission objective tracker.
+
+The orbital model uses the standard Earth gravitational parameter approximation and an Earth rotation rate. It assumes a circular 500 km orbit and fixed 51.6° inclination. It does not include J2 perturbations, atmospheric drag, maneuvers, precise terrain/line-of-sight geometry, or a real communications link budget. Visibility radii, image sizes, battery drain, and data-transfer gameplay values are simplified assumptions. This is an educational game model, not a flight dynamics or mission-planning tool.
+
 ## NASA Earth imagery
 
 The home screen and mission-control view include a NASA GIBS imagery explorer and a NASA EONET open natural-events feed. It requests dated Terra MODIS, Aqua MODIS, and Suomi NPP VIIRS true-colour browse imagery for the Nile Delta, and uses NASA's Blue Marble global image as the Earth globe texture. The globe is a shaded, rotating textured sphere; the regional images are real NASA browse visualizations loaded from the NASA service. The EONET panel lists NASA-curated open event metadata and links to the listed event sources.
