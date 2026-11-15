@@ -46,9 +46,14 @@ describe("Nile Delta Watch mission objectives", () => {
   });
 
   it("fails the data-delivery objective when downlink capacity is insufficient", () => {
-    const engineeringMission = calculateMission(validSelection.map((id) => id === "comms_basic" ? "comms_basic" : id));
-    const outcome = evaluateNileDeltaMission({ engineeringMission, durationDays: 7 });
-    expect(outcome.downlinkTargetPercent).toBe(80);
-    expect(outcome.dataDownlinkedPercent).toBeGreaterThanOrEqual(80);
+    const engineeringMission = calculateMission(validSelection);
+    const limitedDownlink = {
+      ...engineeringMission,
+      metrics: { ...engineeringMission.metrics, downlinkCapacityMBPerContact: 10 },
+    };
+    const outcome = evaluateNileDeltaMission({ engineeringMission: limitedDownlink, durationDays: 7 });
+    expect(outcome.dataDownlinkedPercent).toBeLessThan(80);
+    expect(outcome.missionSuccess).toBe(false);
+    expect(outcome.reasons.some((reason) => reason.includes("transmitted"))).toBe(true);
   });
 });
