@@ -109,3 +109,6 @@
   .lf-timeline-item { font-size: 12px; }
   .lf-sim-header { align-items: flex-start; }
 }
+
+.lf-sim-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 520px) { .lf-sim-header { align-items: flex-start; flex-direction: column; } .lf-sim-header-actions { width: 100%; justify-content: space-between; } }
