@@ -109,6 +109,13 @@ function App() {
           >
             Missions
           </a>
+
+          <a
+            href="#nasa-earth-data"
+            onClick={() => setScreen("home")}
+          >
+            Earth Data
+          </a>
         </nav>
 
         <div className="system-status">
