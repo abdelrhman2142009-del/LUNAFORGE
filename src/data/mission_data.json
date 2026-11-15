@@ -1,0 +1,293 @@
+{
+  "project": "LUNAFORGE",
+  "mission": {
+    "id": "earthwatch_1",
+    "name": "EarthWatch-1",
+    "type": "Earth Observation",
+    "spacecraftType": "6U CubeSat",
+    "orbit": {
+      "name": "Low Earth Orbit (LEO)",
+      "altitudeKm": 500,
+      "altitudeStatus": "selected_mission_design_value",
+      "note": "500 km is the chosen scenario altitude for this educational mission, not a universal CubeSat orbit."
+    },
+    "purpose": "Observe selected areas of Earth and collect images that help users understand environmental changes.",
+    "educationalSimulation": true,
+    "flightReadyDesign": false
+  },
+  "baselineDesign": {
+    "spacecraftSize": {
+      "value": "6U",
+      "dimensionsMm": [
+        100,
+        226.3,
+        366
+      ],
+      "maxMassKg": 12.0,
+      "status": "standard_limit",
+      "source": "CubeSat Design Specification Rev. 14.1; NASA Small Spacecraft Technology State of the Art 2026, Structures chapter."
+    },
+    "targetWetMassKg": {
+      "value": 8.0,
+      "status": "game_design_target",
+      "note": "A conservative design target below the 12 kg 6U limit. This is a project allocation, not the measured mass of a built satellite."
+    },
+    "solarArray": {
+      "exampleProduct": "NPC Spacemind SP6X Deployable",
+      "peakPowerW": 57.6,
+      "specificPowerWPerKg": 74,
+      "estimatedArrayMassKg": 0.78,
+      "status": "manufacturer product data listed in NASA 2026 survey; mass is calculated as peak power divided by specific power"
+    },
+    "battery": {
+      "exampleProduct": "GomSpace NanoPower BPX 3000mA (4S-2P configuration)",
+      "capacityAh": 6.0,
+      "nominalVoltageV": 14.8,
+      "nominalEnergyWh": 88.8,
+      "specificEnergyWhPerKg": 172,
+      "estimatedPackMassKg": 0.52,
+      "status": "NASA 2026 survey lists a 6.0 Ah pack and 172 Wh/kg; voltage/energy are derived from a nominal 4S Li-ion configuration and should be confirmed with the exact vendor datasheet."
+    },
+    "powerBudget": {
+      "averageGenerationW": {
+        "value": 20,
+        "status": "game_design_assumption",
+        "note": "Simplified orbit-average value; do not confuse with the solar array's 57.6 W peak rating."
+      },
+      "averageLoadW": {
+        "value": 12,
+        "status": "game_design_assumption"
+      },
+      "peakLoadW": {
+        "value": 30,
+        "status": "game_design_assumption"
+      },
+      "note": "The spacecraft must duty-cycle high-power camera and transmitter operations. Peak load may exceed average generation and is supported temporarily by the battery."
+    },
+    "dataStorageGB": {
+      "value": 32,
+      "status": "game_design_assumption"
+    },
+    "gameBudgetCredits": {
+      "value": 1000,
+      "status": "game_design_assumption",
+      "note": "Credits are game points, not real procurement prices."
+    }
+  },
+  "massAllocation": [
+    {
+      "subsystem": "6U structure and rails",
+      "massKg": 1.4,
+      "status": "design_estimate",
+      "note": "Within NASA's published 6U structure mass range of 0.916–1.94 kg."
+    },
+    {
+      "subsystem": "Earth-observation camera payload",
+      "massKg": 0.8,
+      "status": "game_design_assumption"
+    },
+    {
+      "subsystem": "Solar array",
+      "massKg": 0.78,
+      "status": "calculated_from_NASA_listed_product_data"
+    },
+    {
+      "subsystem": "Battery pack",
+      "massKg": 0.52,
+      "status": "calculated_estimate_from_NASA_listed_specific_energy"
+    },
+    {
+      "subsystem": "ADCS",
+      "massKg": 1.0,
+      "status": "game_design_assumption"
+    },
+    {
+      "subsystem": "Communication system",
+      "massKg": 0.6,
+      "status": "game_design_assumption"
+    },
+    {
+      "subsystem": "Onboard computer and data handling",
+      "massKg": 0.4,
+      "status": "game_design_assumption"
+    },
+    {
+      "subsystem": "Electrical power management",
+      "massKg": 0.4,
+      "status": "game_design_assumption"
+    },
+    {
+      "subsystem": "Thermal control, harness, and deployment hardware",
+      "massKg": 0.8,
+      "status": "game_design_assumption"
+    },
+    {
+      "subsystem": "System margin and integration allowance",
+      "massKg": 1.3,
+      "status": "game_design_assumption"
+    }
+  ],
+  "componentCatalog": [
+    {
+      "id": "camera_basic",
+      "name": "Basic Earth-observation camera",
+      "massKg": 0.5,
+      "activePowerW": 3,
+      "dataPerImageMB": 25,
+      "costCredits": 120,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "camera_advanced",
+      "name": "Advanced Earth-observation camera",
+      "massKg": 0.8,
+      "activePowerW": 5,
+      "dataPerImageMB": 60,
+      "costCredits": 220,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "solar_body_6u",
+      "name": "6U body-mounted solar panels",
+      "peakPowerW": 27.8,
+      "massKg": 0.45,
+      "costCredits": 140,
+      "status": "mass_and_cost_are_game_assumptions; peak power is a NASA-listed product example"
+    },
+    {
+      "id": "solar_deployable_6u",
+      "name": "6U deployable solar array",
+      "peakPowerW": 57.6,
+      "massKg": 0.78,
+      "costCredits": 230,
+      "status": "peak power and calculated mass based on NASA-listed SP6X data; credits are game assumptions"
+    },
+    {
+      "id": "battery_standard",
+      "name": "Standard Li-ion battery pack",
+      "energyWh": 44,
+      "massKg": 0.35,
+      "costCredits": 100,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "battery_high_capacity",
+      "name": "High-capacity Li-ion battery pack",
+      "energyWh": 88.8,
+      "massKg": 0.52,
+      "costCredits": 180,
+      "status": "energy and estimated mass based on NASA-listed GomSpace pack data"
+    },
+    {
+      "id": "comms_basic",
+      "name": "Basic communication system",
+      "peakPowerW": 5,
+      "massKg": 0.35,
+      "dataRateKbps": 9.6,
+      "costCredits": 100,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "comms_high_rate",
+      "name": "Higher-rate communication system",
+      "peakPowerW": 10,
+      "massKg": 0.6,
+      "dataRateKbps": 128,
+      "costCredits": 220,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "adcs_basic",
+      "name": "Basic attitude control",
+      "peakPowerW": 2,
+      "massKg": 0.6,
+      "costCredits": 100,
+      "status": "game_design_assumption"
+    },
+    {
+      "id": "adcs_precise",
+      "name": "Precision attitude control",
+      "peakPowerW": 5,
+      "massKg": 1.0,
+      "costCredits": 200,
+      "status": "game_design_assumption"
+    }
+  ],
+  "objectives": [
+    "Simulate an Earth-observation satellite.",
+    "Capture simulated images of selected areas on Earth.",
+    "Store collected data onboard.",
+    "Transmit collected data to a simulated ground station.",
+    "Complete the mission while respecting mass, power, storage, and budget limits."
+  ],
+  "workflow": [
+    {
+      "step": 1,
+      "id": "design",
+      "name": "Design"
+    },
+    {
+      "step": 2,
+      "id": "validation",
+      "name": "Validation"
+    },
+    {
+      "step": 3,
+      "id": "launch",
+      "name": "Launch"
+    },
+    {
+      "step": 4,
+      "id": "orbit",
+      "name": "Orbit"
+    },
+    {
+      "step": 5,
+      "id": "observation",
+      "name": "Observation"
+    },
+    {
+      "step": 6,
+      "id": "data_storage",
+      "name": "Data Storage"
+    },
+    {
+      "step": 7,
+      "id": "communication",
+      "name": "Communication"
+    },
+    {
+      "step": 8,
+      "id": "evaluation",
+      "name": "Evaluation"
+    }
+  ],
+  "trackedResources": [
+    {
+      "id": "mass",
+      "unit": "kg"
+    },
+    {
+      "id": "power",
+      "unit": "W"
+    },
+    {
+      "id": "battery_energy",
+      "unit": "Wh"
+    },
+    {
+      "id": "storage",
+      "unit": "GB"
+    },
+    {
+      "id": "budget",
+      "unit": "game credits"
+    }
+  ],
+  "dataQualityRules": [
+    "NASA-listed product values are reference examples, not universal values for all CubeSats.",
+    "All values marked game_design_assumption are fixed game-balancing values, not verified hardware specifications.",
+    "Do not present the 500 km scenario altitude as a universal Earth-observation orbit.",
+    "Do not claim NASA imagery was captured by the fictional EarthWatch-1 satellite."
+  ]
+}

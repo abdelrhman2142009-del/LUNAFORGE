@@ -1,0 +1,67 @@
+[
+  {
+    "term": "6U CubeSat",
+    "definition": "A CubeSat built from six standardized units. NASA lists nominal dimensions of 100 × 226.3 × 366 mm for the 6U structure."
+  },
+  {
+    "term": "LEO (Low Earth Orbit)",
+    "definition": "An orbit relatively close to Earth. EarthWatch-1 uses 500 km as its selected educational scenario altitude."
+  },
+  {
+    "term": "Earth Observation",
+    "definition": "Collecting information about Earth's surface, atmosphere, or environment using sensors and imaging instruments."
+  },
+  {
+    "term": "Payload",
+    "definition": "Equipment that performs the main mission task. EarthWatch-1 uses an Earth-observation camera as its example payload."
+  },
+  {
+    "term": "Solar Array",
+    "definition": "Solar cells connected into panels or arrays that convert sunlight into electrical power."
+  },
+  {
+    "term": "Peak Power",
+    "definition": "The maximum power rating under specified conditions. It is not the same as average power available throughout an orbit."
+  },
+  {
+    "term": "Average Power",
+    "definition": "Power averaged over a stated period. For a satellite it depends on sunlight, eclipse, orientation, and operating schedule."
+  },
+  {
+    "term": "Battery Capacity",
+    "definition": "The amount of electrical charge a battery can store, commonly expressed in ampere-hours (Ah)."
+  },
+  {
+    "term": "Battery Energy",
+    "definition": "Stored electrical energy, commonly expressed in watt-hours (Wh). It depends on both battery capacity and voltage."
+  },
+  {
+    "term": "ADCS",
+    "fullForm": "Attitude Determination and Control System",
+    "definition": "The subsystem that determines and controls the spacecraft's orientation."
+  },
+  {
+    "term": "Ground Station",
+    "definition": "A ground-based facility used to communicate with a spacecraft."
+  },
+  {
+    "term": "Data Downlink",
+    "definition": "Transmission of data from a spacecraft to a ground station."
+  },
+  {
+    "term": "Mass Budget",
+    "definition": "The allocation and accounting of spacecraft mass, including a margin for growth and uncertainty."
+  },
+  {
+    "term": "Power Budget",
+    "definition": "An accounting of electrical power generated, stored, and consumed by spacecraft subsystems."
+  },
+  {
+    "term": "Game Design Assumption",
+    "definition": "A chosen simplified value used to make the educational game playable. It must not be described as a verified hardware specification."
+  },
+  {
+    "term": "Beginning of Life (BOL)",
+    "definition": "A reference condition near the start of a spacecraft's operational life; solar-array output can change over time due to degradation and operating conditions."
+  }
+]
