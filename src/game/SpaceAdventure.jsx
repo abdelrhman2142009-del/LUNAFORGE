@@ -41,6 +41,9 @@ function makeGame(profile, challenge) {
     challenge,
     coreGoal: challenge.coreGoal,
     discoveries: [],
+    crystalsDestroyed: 0,
+    flaresSurvived: 0,
+    storyMilestones: [],
     shield: 0,
     fireTimer: 0,
     rockTimer: 0,
@@ -448,6 +451,10 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
         burst(game, WIDTH / 2, 100, "#ff8ca8", 28, 200);
       }
 
+      if (game.coresCollected >= 3 && !game.storyMilestones.includes("research-log")) {
+        game.storyMilestones.push("research-log");
+        notify(game, "CONTROL: We found the station log. Something was guarding this relay.");
+      }
       if (game.coresCollected >= 5 && !game.beacon && !game.beaconReached) {
         game.beacon = { x: 100 + Math.random() * (WIDTH - 200), y: 115, phase: 0 };
         notify(game, "DISTRESS SIGNAL FOUND — REACH THE GOLD RELAY");
@@ -461,8 +468,14 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
       if (game.flare) {
         game.flare.x -= 310 * dt;
         game.flare.life -= dt;
-        if (Math.abs(ship.x - game.flare.x) < 43 && ship.y > 35 && ship.y < HEIGHT - 20) damage();
-        if (game.flare.life <= 0 || game.flare.x < -60) game.flare = null;
+        if (Math.abs(ship.x - game.flare.x) < 43 && ship.y > 35 && ship.y < HEIGHT - 20) {
+          game.flare.hit = true;
+          damage();
+        }
+        if (game.flare.life <= 0 || game.flare.x < -60) {
+          if (!game.flare.hit) game.flaresSurvived += 1;
+          game.flare = null;
+        }
       }
 
       if ((keys[" "] || keys.Space) && game.fireTimer <= 0) {
@@ -476,7 +489,7 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
         game.boss.x += game.boss.vx * dt;
         game.boss.y = 100 + Math.sin(game.boss.phase * 2.1) * 24;
         if (game.boss.x < 65 || game.boss.x > WIDTH - 65) game.boss.vx *= -1;
-        if (game.bossShotTimer > 1.55) {
+        if (game.bossShotTimer > (game.boss.hp <= 3 ? 1.0 : 1.55)) {
           game.bossShotTimer = 0;
           const angle = Math.atan2(ship.y - game.boss.y, ship.x - game.boss.x);
           game.enemyShots.push({ x: game.boss.x, y: game.boss.y + 22, vx: Math.cos(angle) * 190, vy: Math.sin(angle) * 190 });
@@ -512,7 +525,8 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
               game.boss = null;
               game.bossDefeated = true;
               game.score += 700;
-              notify(game, "SENTINEL DISABLED — FLIGHT PATH CLEAR");
+              game.storyMilestones.push("sentinel-disabled");
+              notify(game, "CONTROL: Sentinel disabled. The rescue channel is open.");
               burst(game, defeated.x, defeated.y, "#ffd18a", 48, 260);
             }
           }
@@ -533,6 +547,7 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
           game.shots.splice(shotIndex, 1);
           game.rocks.splice(i, 1);
           game.score += rock.kind === "crystal" ? 100 : 50;
+          if (rock.kind === "crystal") game.crystalsDestroyed += 1;
           game.combo += 1;
           game.comboTimer = 3.2;
           burst(game, rock.x, rock.y, rock.kind === "crystal" ? "#7bf5e8" : "#ffb66e", 15);
@@ -598,7 +613,12 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
       game.particles = game.particles.filter((p) => p.life > 0);
 
       if (game.comboTimer <= 0) game.combo = 0;
-      if (game.coresCollected >= game.coreGoal && game.beaconReached && game.bossDefeated) {
+      const dailyObjectiveComplete = game.challenge.title === "CRYSTAL HARVEST"
+        ? game.crystalsDestroyed >= 3
+        : game.challenge.title === "SOLAR STORM RUN"
+          ? game.flaresSurvived >= 1
+          : true;
+      if (game.coresCollected >= game.coreGoal && game.beaconReached && game.bossDefeated && dailyObjectiveComplete) {
         game.score += 250 + game.challenge.bonus;
         burst(game, ship.x, ship.y, "#8df7ff", 42, 250);
         syncHud(game);
@@ -705,10 +725,11 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
                   <div><small>FLIGHT TIME</small><strong>{Math.floor(gameRef.current.elapsed)}s</strong></div>
                   <div><small>DISCOVERIES</small><strong>{gameRef.current.discoveries.length}</strong></div>
                   <div><small>SENTINEL</small><strong>{gameRef.current.bossDefeated ? "CLEAR" : "ACTIVE"}</strong></div>
+                  <div><small>DAILY TASK</small><strong>{gameRef.current.challenge.title === "CRYSTAL HARVEST" ? gameRef.current.crystalsDestroyed + "/3 CRYSTALS" : gameRef.current.challenge.title === "SOLAR STORM RUN" ? gameRef.current.flaresSurvived + "/1 FLARE" : "10 CORES"}</strong></div>
                   <p>{status === "won" ? "RESCUE CONFIRMED · DAILY BONUS INCLUDED" : "FLIGHT LOG SAVED · REVIEW YOUR ENGINEERING LOADOUT"}</p>
                 </div>
               )}
-              {status === "ready" && <div className="sa-objectives"><span>01 / RECOVER {dailyChallenge.coreGoal} DATA CORES</span><span>02 / DISABLE THE SENTINEL</span><span>03 / RESTORE THE GOLD RELAY</span><span>03 / DISABLE THE SENTINEL</span><span>04 / SURVIVE THE SOLAR FLARE</span></div>}
+              {status === "ready" && <div className="sa-objectives"><span>01 / RECOVER {dailyChallenge.coreGoal} DATA CORES</span><span>02 / DISABLE THE SENTINEL</span><span>03 / RESTORE THE GOLD RELAY</span><span>03 / DISABLE THE SENTINEL</span><span>04 / {dailyChallenge.objectiveText}</span></div>}
               <button onClick={status === "ready" || status === "won" || status === "lost" ? startGame : () => setStatus("playing")}>
                 {status === "ready" ? "▶ LAUNCH MISSION" : status === "paused" ? "▶ RESUME FLIGHT" : "↻ FLY AGAIN"}
               </button>
@@ -725,7 +746,7 @@ export default function SpaceAdventure({ onBack = () => {}, engineeringReport = 
       </section>
 
       <section className="sa-meta-grid">
-        <article className="sa-meta-card sa-challenge-card"><small>DAILY FLIGHT CHALLENGE · {dailyChallenge.dateKey}</small><strong>{dailyChallenge.title}</strong><p>{dailyChallenge.briefing}</p><span>COMPLETION BONUS · {dailyChallenge.bonus} PTS</span></article>
+        <article className="sa-meta-card sa-challenge-card"><small>DAILY FLIGHT CHALLENGE · {dailyChallenge.dateKey}</small><strong>{dailyChallenge.title}</strong><p>{dailyChallenge.briefing}</p><p className="sa-challenge-objective">DAILY OBJECTIVE: {dailyChallenge.objectiveText}</p><span>COMPLETION BONUS · {dailyChallenge.bonus} PTS</span></article>
         <article className="sa-meta-card"><small>ENGINEERING FLIGHT PROFILE</small><strong>{profile.className}</strong><p>Mass {profile.massKg.toFixed(2)} kg · Battery {profile.batteryWh.toFixed(0)} Wh · Solar {profile.solarOutput.toFixed(1)} W</p><p>Agility ×{profile.agility.toFixed(2)} · Boost recharge {profile.boostRecharge.toFixed(1)}/s · Science ×{(profile.scienceMultiplier * profile.communicationsBonus).toFixed(2)}</p><button type="button" onClick={onEditDesign}>EDIT SPACECRAFT DESIGN ↗</button></article>
       </section>
       <section className="sa-journal-panel">
