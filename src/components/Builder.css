@@ -725,3 +725,97 @@
   .workshop-preset-grid { grid-template-columns: 1fr; }
   .workshop-preset-card { min-height: 0; }
 }
+
+
+/* Workshop layout correction: advisor spans the top; library and resources sit below. */
+.builder-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  align-items: start;
+  gap: 24px;
+}
+.builder-layout > :first-child {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  min-width: 0;
+}
+.builder-layout > .builder-main {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+}
+.builder-layout > .builder-sidebar {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+}
+.component-grid {
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+  gap: 16px;
+}
+.component-card {
+  padding: 22px;
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 92% 4%, rgba(57, 171, 220, .12), transparent 38%),
+    linear-gradient(145deg, #142d45, #0b1b2c 78%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .14);
+}
+.component-card h3 {
+  min-height: 42px;
+  margin: 12px 0 8px;
+  color: #f1f7fc;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.component-card > p {
+  min-height: 58px;
+  color: #afc2d4;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.component-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-top: 16px;
+  border: 1px solid rgba(82, 195, 242, .3);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(45, 163, 211, .2), rgba(25, 67, 96, .22));
+  color: #80dcff;
+  font-size: 27px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 5px 16px rgba(0,0,0,.16);
+}
+.component-specs {
+  gap: 12px;
+}
+.component-specs strong {
+  font-size: 11px;
+}
+.builder-sidebar {
+  max-height: none;
+}
+@media (max-width: 900px) {
+  .builder-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .builder-layout > :first-child,
+  .builder-layout > .builder-main,
+  .builder-layout > .builder-sidebar {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .builder-sidebar {
+    position: static;
+  }
+}
+@media (max-width: 560px) {
+  .builder-page {
+    width: min(100% - 32px, 1320px);
+  }
+  .component-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
