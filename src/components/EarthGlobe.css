@@ -18,11 +18,11 @@
   border-radius: 50%;
   overflow: hidden;
   background:
-    radial-gradient(circle at 35% 30%, #5c9fc2 0%, #1a4d76 48%, #071a32 78%);
+    radial-gradient(circle at 35% 30%, #79c5e8 0%, #286b9b 48%, #0b2947 78%);
   box-shadow:
     0 0 28px rgba(76, 173, 235, .42),
     0 0 78px rgba(35, 125, 194, .28),
-    inset -22px -8px 32px rgba(0, 0, 0, .62),
+    inset -18px -6px 26px rgba(0, 0, 0, .38),
     inset 8px 4px 20px rgba(193, 232, 255, .15);
   isolation: isolate;
 }
@@ -57,7 +57,7 @@
   border-radius: 50%;
   background:
     radial-gradient(ellipse at 31% 27%, rgba(255,255,255,.2), transparent 24%),
-    linear-gradient(90deg, rgba(0,0,0,.02) 35%, rgba(0,0,0,.22) 66%, rgba(0,0,0,.84) 100%);
+    linear-gradient(90deg, rgba(0,0,0,.02) 35%, rgba(0,0,0,.12) 66%, rgba(0,0,0,.58) 100%);
   box-shadow: inset -16px -8px 30px rgba(0,0,0,.54);
 }
 
