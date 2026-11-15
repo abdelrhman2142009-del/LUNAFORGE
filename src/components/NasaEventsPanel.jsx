@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import "./NasaEventsPanel.css";
-
-const EVENTS_URL = "https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=8";
+import { NASA_EONET_EVENTS_URL } from "../data/nasaEarthData.js";
 
 export default function NasaEventsPanel() {
   const [events, setEvents] = useState([]);
@@ -11,7 +10,7 @@ export default function NasaEventsPanel() {
   const loadEvents = useCallback(async (signal) => {
     setStatus("loading");
     try {
-      const response = await fetch(EVENTS_URL, { signal });
+      const response = await fetch(NASA_EONET_EVENTS_URL, { signal });
       if (!response.ok) throw new Error(`NASA EONET returned HTTP ${response.status}`);
       const payload = await response.json();
       setEvents(Array.isArray(payload.events) ? payload.events : []);
