@@ -1,0 +1,58 @@
+export const components = [
+  {
+    id: 'camera_basic',
+    name: 'Basic Camera',
+    type: 'payload',
+    mass: 0.5,
+    power: 2,
+    cost: 100,
+    storage: 0,
+    capacity: 0,
+    source: 'Illustrative gameplay value',
+    isAssumption: true
+  },
+  {
+    id: 'camera_advanced',
+    name: 'Advanced Camera',
+    type: 'payload',
+    mass: 1.2,
+    power: 5,
+    cost: 300,
+    storage: 0,
+    capacity: 0,
+    source: 'Illustrative gameplay value',
+    isAssumption: true
+  },
+  {
+    id: 'battery_basic',
+    name: 'Basic Battery',
+    type: 'power',
+    mass: 0.8,
+    power: 0,
+    cost: 150,
+    storage: 0,
+    capacity: 20,
+    source: 'Illustrative gameplay value',
+    isAssumption: true
+  },
+  {
+    id: 'solar_panel_basic',
+    name: 'Basic Solar Panel',
+    type: 'power',
+    mass: 0.7,
+    power: 0,
+    cost: 120,
+    storage: 0,
+    capacity: 0,
+    source: 'Illustrative gameplay value',
+    isAssumption: true
+  }
+];
+
+export function getComponents() {
+  return components;
+}
+
+export function getComponentById(id) {
+  return components.find(c => c.id === id) || null;
+}
