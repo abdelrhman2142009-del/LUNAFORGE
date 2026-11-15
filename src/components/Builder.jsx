@@ -195,6 +195,14 @@ function Builder({ onProceed }) {
     setSelectedComponents([]);
   };
 
+  const loadRecommendedBuild = () => {
+    const starterIds = [
+      "structure-1", "power-1", "battery-1", "camera-1",
+      "computer-1", "communication-1", "adcs-1", "eps-1",
+    ];
+    setSelectedComponents(starterIds.map((id) => components.find((item) => item.id === id)));
+  };
+
   // RESOURCE LIMITS
 
   const massExceeded = totals.mass > MAX_MASS;
@@ -411,6 +419,15 @@ function Builder({ onProceed }) {
               <span className="workshop-stage-label">SPACECRAFT CONFIGURATION / CONCEPT ONLY</span>
             </div>
           </section>
+
+          <div className="workshop-presets">
+            <div>
+              <span className="builder-overline">QUICK START</span>
+              <strong>Choose a starting design</strong>
+              <p>Load a balanced starter spacecraft, then customize every system.</p>
+            </div>
+            <button type="button" onClick={loadRecommendedBuild}>LOAD BALANCED EXPLORER ↗</button>
+          </div>
 
           <div className="builder-categories">
             {categories.map((category) => (
