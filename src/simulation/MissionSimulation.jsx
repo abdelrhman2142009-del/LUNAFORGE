@@ -54,6 +54,7 @@ export default function MissionSimulation({
   const [observedAreas, setObservedAreas] = useState([]);
   const observedAreasRef = useRef([]);
   const [missedContacts, setMissedContacts] = useState(0);
+  const [difficulty, setDifficulty] = useState("standard");
   const missedContactsRef = useRef(0);
   const [logEntries, setLogEntries] = useState([
     makeLogEntry("Mission control ready", "The educational CubeSat scenario is ready to start."),
@@ -125,6 +126,7 @@ export default function MissionSimulation({
           );
         }
       },
+      eventProbability: difficulty === "training" ? 0.03 : difficulty === "expert" ? 0.28 : 0.12,
       onEvent: handleEvent,
       onComplete: (finalState) => {
         const outcome = evaluateNileDeltaMission({
@@ -249,6 +251,14 @@ export default function MissionSimulation({
           </div>
 
           <div className="lf-controls">
+            <label className="lf-difficulty-control">
+              Scenario intensity
+              <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} disabled={isRunning || isPaused}>
+                <option value="training">Training · fewer random events</option>
+                <option value="standard">Standard · balanced</option>
+                <option value="expert">Expert · more random events</option>
+              </select>
+            </label>
             {!isRunning && !isPaused && !isCompleted && <button className="lf-button lf-button-primary" onClick={handleStart}>Start simulation</button>}
             {isRunning && <button className="lf-button lf-button-primary" onClick={handlePause}>Pause</button>}
             {isPaused && <button className="lf-button lf-button-primary" onClick={handleResume}>Resume</button>}
