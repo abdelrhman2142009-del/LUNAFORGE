@@ -318,6 +318,14 @@ function App() {
                   Collect and transmit Earth observation data.
                 </strong>
               </div>
+              <div className="objective-highlight">
+                <span>PRIORITY OBSERVATION AREAS</span>
+                <ul className="requirements-list">
+                  {nileDeltaWatch.mission.region.focusAreas.map((area) => (
+                    <li key={area}>{area}</li>
+                  ))}
+                </ul>
+              </div>
             </article>
 
             <article className="briefing-card">
@@ -338,7 +346,9 @@ function App() {
               <h2>MISSION CONSTRAINTS</h2>
 
               <div className="parameter-list">
+                <div><span>Spacecraft dimensions</span><strong>100 × 226.3 × 366 mm</strong></div>
                 <div><span>Maximum mass</span><strong>12.0 kg</strong></div>
+                <div><span>Target wet mass</span><strong>8.0 kg (game target)</strong></div>
                 <div><span>Available budget</span><strong>1,000 credits</strong></div>
                 <div><span>Power system</span><strong>Must support operations</strong></div>
                 <div><span>Data storage</span><strong>Must fit collected data</strong></div>
