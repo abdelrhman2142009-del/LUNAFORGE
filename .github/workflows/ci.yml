@@ -1,0 +1,39 @@
+name: LUNAFORGE CI
+
+on:
+  push:
+    branches: [main, member-5-integration-deliverables]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Run automated tests
+        run: npm test
+      - name: Generate dependency audit report
+        if: always()
+        run: |
+          npm audit --json > npm-audit-report.json || true
+          node --input-type=module -e 'import fs from "node:fs"; const r = JSON.parse(fs.readFileSync("npm-audit-report.json", "utf8")); console.log("Dependency audit summary:", JSON.stringify(r.metadata?.vulnerabilities ?? {}, null, 2)); for (const [name, item] of Object.entries(r.vulnerabilities ?? {})) console.log(`${name}: ${item.severity} — direct: ${item.isDirect}`);'
+      - name: Upload dependency audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: |
+            npm-audit-report.json
+            package-lock.json
+          if-no-files-found: ignore
+      - name: Build production app
+        run: npm run build
+

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import "./App.css";
 import Builder from "./components/Builder";
-import MissionSimulation from "./components/MissionSimulation";
+import MissionSimulation from "./simulation/MissionSimulation";
 import { runEngineeringWhatIf } from "./engine/engineAdapter";
 const features = [
   {
@@ -40,6 +40,22 @@ function App() {
   const powerBalance = missionReport?.powerBalance ?? 0;
   const powerSufficient = missionReport?.powerSufficient ?? false;
   const engineAnalysis = missionReport?.engineAnalysis;
+  const simulationGenerationW = engineAnalysis?.mission?.metrics?.averageGenerationW ?? 0;
+  const simulationPowerMarginW = engineAnalysis?.mission?.metrics?.powerMarginW ?? 0;
+  const simulationPowerPercent = simulationGenerationW > 0
+    ? Math.max(0, Math.min(100, (simulationPowerMarginW / simulationGenerationW) * 100))
+    : 0;
+  const simulationStoragePercent = engineAnalysis?.mission?.metrics?.storageUtilizationPercent ?? 0;
+  const simulationMissionValid = Boolean(engineAnalysis?.feasible && powerSufficient);
+  const simulationMassBudgetPercent = Math.max(
+    0,
+    Math.min(100, (1 - ((missionReport?.totals?.mass ?? 0) / 12)) * 100)
+  );
+  const simulationResourceStatus = {
+    powerPercent: simulationPowerPercent,
+    storagePercent: Math.max(0, Math.min(100, simulationStoragePercent)),
+    communication: (missionReport?.downlinkSpeed ?? 0) > 0 ? "Available" : "Not configured",
+  };
   const cameraUpgrade = missionReport?.selectedComponents?.some((item) => item.id === "camera-1")
     ? missionReport.selectedComponents.map((item) => item.id === "camera-1"
         ? { ...item, id: "camera-2", name: "Advanced Earth Camera", mass: 0.8, cost: 220, power: 5, dataGenerationMBPerMinute: 20 }
@@ -581,7 +597,12 @@ function App() {
 
 {screen === "simulation" && missionReport && (
   <MissionSimulation
-    missionReport={missionReport}
+    resourceStatus={simulationResourceStatus}
+    missionValid={simulationMissionValid}
+    missionInputs={{
+      powerMarginPercent: simulationPowerPercent,
+      massBudgetPercent: simulationMassBudgetPercent,
+    }}
     onBack={() => setScreen("analysis")}
   />
 )}
