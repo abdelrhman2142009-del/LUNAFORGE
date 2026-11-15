@@ -8,6 +8,7 @@ import MissionLog from "./MissionLog.jsx";
 import "./simulation.css";
 import EarthGlobe from "../components/EarthGlobe";
 import NasaImageryPanel from "../components/NasaImageryPanel";
+import OrbitMissionControl from "./OrbitMissionControl.jsx";
 import "./simulation-enhancements.css";
 
 function makeLogEntry(title, message) {
@@ -272,6 +273,8 @@ export default function MissionSimulation({
           </div>
         </aside>
       </section>
+
+      <OrbitMissionControl engineeringMission={engineeringMission} />
 
       <NasaImageryPanel />
 
