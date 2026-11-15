@@ -1,7 +1,7 @@
 # LUNAFORGE — Nile Delta Watch Integration Audit
 
 **Branch:** `member-1-nile-delta-watch`  
-**Audit status:** Implementation updated; automated CI verification pending  
+**Audit status:** Implementation updated; GitHub Actions test and production-build checks passed on the feature branch  
 **Scope:** Research data, runtime catalog, engineering calculations, Builder adapter, mission selection/briefing, simulation, tests, and documentation.
 
 ## Summary
@@ -72,7 +72,7 @@ The changes do not make LUNAFORGE a flight design tool. All orbit, average-gener
 - A failed downlink objective when contact capacity is insufficient.
 - Mission component IDs resolving against the canonical runtime catalog.
 
-Existing engineering and simulation tests remain in place. GitHub Actions must still execute `npm test` and `npm run build` before the branch can be considered verified.
+Existing engineering and simulation tests remain in place. GitHub Actions completed successfully: `npm test` and `npm run build` both passed on the pull-request commit. The checks should run again for any subsequent code changes.
 
 ## Known limitations / review items
 
